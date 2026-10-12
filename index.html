@@ -145,6 +145,7 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
       <div class="tabs" role="group" aria-label="Choose league">
         <button id="tab-points" aria-pressed="true">Points</button>
         <button id="tab-correct" aria-pressed="false">Correct</button>
+        <button id="tab-combined" aria-pressed="false">Combined</button>
       </div>
     </div>
     <div class="scroll"><table class="lt" id="lt"></table></div>
@@ -212,7 +213,9 @@ function standings(ps,computed,uptoN){
     st[p]={correct:wins.length,cAvg:avg(wins),oAvg:avg(all),score:run,last5:settled.slice(-5).reduce((s,c)=>s+(c.pts[p]||0),0),
       form:settled.slice(-5).map(c=>c.pts[p]),cum,returns:wins.reduce((s,x)=>s+x,0)};
   });
-  return{st,rankS:rankLabels(ps,p=>[st[p].score]),rankC:rankLabels(ps,p=>[st[p].correct,st[p].cAvg]),rankF:rankLabels(ps,p=>[st[p].last5]),settled};
+  const rankS=rankLabels(ps,p=>[st[p].score]), rankC=rankLabels(ps,p=>[st[p].correct,st[p].cAvg]);
+  ps.forEach(p=>{st[p].combined=rankS[p].n+rankC[p].n});
+  return{st,rankS,rankC,rankX:rankLabels(ps,p=>[-st[p].combined]),rankF:rankLabels(ps,p=>[st[p].last5]),settled};
 }
 function spark(cum,lo,hi){
   const w=90,h=26;if(cum.length<2)return"";
@@ -244,20 +247,25 @@ function render(){
 }
 
 function renderLeague(ps,now,prev,lastN){
-  const {st}=now, isP=league==="points";
-  const rank=isP?now.rankS:now.rankC, prank=prev?(isP?prev.rankS:prev.rankC):null;
+  const {st}=now, isP=league==="points", isX=league==="combined";
+  const key=isP?"rankS":isX?"rankX":"rankC";
+  const rank=now[key], prank=prev?prev[key]:null;
   const order=[...ps].sort((a,b)=>rank[a].n-rank[b].n||a.localeCompare(b));
   const all=ps.flatMap(p=>st[p].cum.concat([0])), lo=Math.min(...all), hi=Math.max(...all);
   $("lt-meta").textContent=lastN?`After week ${lastN}`+(prev?" · arrows show movement since last week":""):"No settled weeks yet";
-  let h=isP
+  let h=isX
+    ?`<thead><tr><th>Pos</th><th></th><th>Player</th><th class="r">Points pos</th><th class="r">Correct pos</th><th class="r">Pts</th><th class="r">Correct</th><th class="r">Total</th></tr></thead><tbody>`
+    :isP
     ?`<thead><tr><th>Pos</th><th></th><th>Player</th><th>Last 5</th><th>Season</th><th class="r">L5</th><th class="r">Pts</th></tr></thead><tbody>`
     :`<thead><tr><th>Pos</th><th></th><th>Player</th><th class="r">Correct</th><th class="r">Correct avg</th><th class="r">Overall avg</th><th class="r">£ returned</th></tr></thead><tbody>`;
   order.forEach((p,i)=>{
     const r=rank[p];let mv=`<td class="mv same">–</td>`;
     if(prank){const d=prank[p].n-r.n;mv=d>0?`<td class="mv up">▲${d}</td>`:d<0?`<td class="mv down">▼${-d}</td>`:`<td class="mv same">●</td>`}
-    const cls=r.n===1?"lead":(i===order.length-1&&rank[order[0]].n!==r.n)?"foot":"";
+    const cls=r.n===1?"lead":(i===order.length-1&&rank[order[0]].n!==r.n&&!r.label.startsWith("T"))?"foot":"";
     const who=`<td><div class="who"><span class="badge">${esc(p)}</span><span class="nm">${esc(fullName(p))}${fullName(p)!==p?`<small>${esc(p)}</small>`:""}</span></div></td>`;
-    if(isP){
+    if(isX){
+      h+=`<tr class="${cls}"><td class="pos">${r.label}</td>${mv}${who}<td class="r num">${now.rankS[p].label}</td><td class="r num">${now.rankC[p].label}</td><td class="r num">${st[p].score}</td><td class="r num">${st[p].correct}</td><td class="r pts">${st[p].combined}</td></tr>`;
+    }else if(isP){
       const form=Array.from({length:5},(_,k)=>{const v=st[p].form[st[p].form.length-5+k];if(v===undefined)return`<span class="fc"></span>`;const c=v===2?"p2":v===1?"p1":v===-1?"pm":"p0";return`<span class="fc ${c}">${v>0?"+"+v:v===-1?"−1":"0"}</span>`}).join("");
       h+=`<tr class="${cls}"><td class="pos">${r.label}</td>${mv}${who}<td><div class="form">${form}</div></td><td>${spark(st[p].cum,lo,hi)}</td><td class="r num">${st[p].last5}</td><td class="r pts">${st[p].score}</td></tr>`;
     }else{
@@ -265,7 +273,7 @@ function renderLeague(ps,now,prev,lastN){
     }
   });
   $("lt").innerHTML=h+"</tbody>";
-  $("lt-note").textContent=isP?"Players level on points share a position. Form chips run oldest to newest.":"Ranked by winners picked, ties split by average odds of those winners. £ returned is what each person's £1 bets would have paid back as singles.";
+  $("lt-note").textContent=isX?"Combined adds each player's Points league position and Correct league position. Lowest total leads; level totals share a position.":isP?"Players level on points share a position. Form chips run oldest to newest.":"Ranked by winners picked, ties split by average odds of those winners. £ returned is what each person's £1 bets would have paid back as singles.";
 }
 
 function renderGrid(ps,computed){
@@ -282,10 +290,10 @@ function renderGrid(ps,computed){
 
 function renderDesk(){}
 /* league tabs */
-[["tab-points","points"],["tab-correct","correct"]].forEach(([id,v])=>$(id).addEventListener("click",()=>{
-  league=v;$("tab-points").setAttribute("aria-pressed",v==="points");$("tab-correct").setAttribute("aria-pressed",v==="correct");
-  try{localStorage.setItem("league",v)}catch(e){}render()}));
-try{const s=localStorage.getItem("league");if(s==="correct"){league=s;$("tab-points").setAttribute("aria-pressed","false");$("tab-correct").setAttribute("aria-pressed","true")}}catch(e){}
+const TABS=[["tab-points","points"],["tab-correct","correct"],["tab-combined","combined"]];
+function setLeague(v){league=v;TABS.forEach(([id,k])=>$(id).setAttribute("aria-pressed",String(k===v)))}
+TABS.forEach(([id,v])=>$(id).addEventListener("click",()=>{setLeague(v);try{localStorage.setItem("league",v)}catch(e){}render()}));
+try{const s=localStorage.getItem("league");if(TABS.some(([,k])=>k===s))setLeague(s)}catch(e){}
 
 const DATA={"meta":{"name":"Oakwood Syndicate","names":{"CJ":"Charlie Johnson","CR":"Tighty Tufnell","JS":"Jack Strong","MP":"Matt Patey","OC":"Oliver Cole","PM":"Paul Monan","TC":"Tom Cronk","TG":"Thomas Gillespie","WD":"Will Dolton"},"players":["CJ","CR","JS","MP","OC","PM","TG","TC","WD"],"season":"2026/27","stake":1,"treasurer":"Cronk","updated":"12 Oct 2026","uploader":"JS"},"weeks":[{"n":1,"picks":{"CJ":{"odds":1.67,"result":"L"},"CR":{"odds":1.91,"result":"W"},"JS":{"odds":2.45,"result":"L"},"MP":{"odds":2.4,"result":"L"},"OC":{"odds":2.15,"result":"L"},"PM":{"odds":1.67,"result":"W"},"TC":{"odds":2.25,"result":"W"},"TG":{"odds":1.91,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":2,"picks":{"CJ":{"odds":2.63,"result":"W"},"CR":{"odds":2.9,"result":"W"},"JS":{"odds":2.1,"result":"L"},"MP":{"odds":2.25,"result":"W"},"OC":{"odds":2.7,"result":"L"},"PM":{"odds":1.91,"result":"L"},"TC":{"odds":1.73,"result":"L"},"TG":{"odds":2,"result":"L"},"WD":{"odds":2.25,"result":"W"}},"treasurer":"Cronk"},{"n":3,"picks":{"CJ":{"odds":1.95,"result":"L"},"CR":{"odds":1.57,"result":"W"},"JS":{"odds":1.87,"result":"L"},"MP":{"odds":2.5,"result":"L"},"OC":{"odds":1.91,"result":"W"},"PM":{"odds":2.5,"result":"L"},"TC":{"odds":2.2,"result":"L"},"TG":{"odds":3.6,"result":"W"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":4,"picks":{"CJ":{"odds":3.6,"result":"L"},"CR":{"odds":1.67,"result":"W"},"JS":{"odds":2,"result":"W"},"MP":{"odds":1.8,"result":"W"},"OC":{"odds":1.8,"result":"L"},"PM":{"odds":2.05,"result":"W"},"TC":{"odds":3.5,"result":"W"},"TG":{"odds":3.1,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":5,"picks":{"CJ":{"odds":1.57,"result":"W"},"CR":{"odds":1.95,"result":"L"},"JS":{"odds":1.53,"result":"W"},"MP":{"odds":1.87,"result":"W"},"OC":{"odds":1.9,"result":"L"},"PM":{"odds":1.8,"result":"W"},"TC":{"odds":2.1,"result":"W"},"TG":{"odds":2.9,"result":"L"},"WD":{"odds":2.4,"result":"W"}},"treasurer":"Cronk"},{"n":6,"picks":{"CJ":{"odds":2.4,"result":"L"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.62,"result":"L"},"MP":{"odds":2.63,"result":"L"},"OC":{"odds":2,"result":"L"},"PM":{"odds":2.1,"result":"L"},"TC":{"odds":1.7,"result":"L"},"TG":{"odds":2.05,"result":"L"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":7,"picks":{"CJ":{"odds":2,"result":"W"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.83,"result":"W"},"MP":{"odds":1.67,"result":"L"},"OC":{"odds":2.63,"result":"L"},"PM":{"odds":3.25,"result":"W"},"TC":{"odds":2.38,"result":"L"},"TG":{"odds":2.63,"result":"L"},"WD":{"odds":2.8,"result":"W"}},"treasurer":"Cronk"},{"date":"19 Sep 2026","n":8,"picks":{"CJ":{"odds":1.8,"result":"L","team":"BURNLEY"},"CR":{"odds":2.4,"result":"L","team":"SAINTS"},"JS":{"odds":2.8,"result":"L","team":"WEDS"},"MP":{"odds":2,"result":"L","team":"OXFORD"},"OC":{"odds":2.4,"result":"L","team":"ST MIRREN"},"PM":{"odds":1.75,"result":"W","team":"EVERTON"},"TC":{"odds":1.62,"result":"L","team":"CLYDE"},"TG":{"odds":1.73,"result":"L","team":"QPR"},"WD":{"odds":2.75,"result":"L","team":"KIDDY"}},"treasurer":"Cronk"},{"date":"10 Oct 2026","n":9,"picks":{"CJ":{"odds":2.3,"result":"L","team":"WREXHAM"},"CR":{"odds":2.15,"result":"L","team":"DUNFERMLINE"},"JS":{"odds":1.8,"result":"W","team":"HAMILTON"},"MP":{"odds":1.67,"result":"W","team":"SOUTHEND"},"OC":{"odds":2,"result":"W","team":"STEVENAGE"},"PM":{"odds":2.3,"result":"L","team":"CARDIFF"},"TC":{"odds":1.44,"result":"W","team":"HEARTS"},"TG":{"odds":1.87,"result":"L","team":"FALKIRK"},"WD":{"odds":2.1,"result":"W","team":"HARROGATE"}},"treasurer":"Cronk"}]};
 meta=DATA.meta;weeks=DATA.weeks;render();
