@@ -1,6 +1,6 @@
 <!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Oakwood Syndicate</title></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=VT323&display=swap">
 <style>
 /* Layout: matchday programme. Floodlit league table up top, picks grid below, owner-only matchday desk at the foot. */
 :root{
@@ -28,7 +28,8 @@
   --win:#1f3a22; --win-ink:#c9efc4; --best:#3fbf2e; --best-ink:#061503;
   --loss:#432427; --loss-ink:#f3cfcf; --worst:#d6352a; --worst-ink:#ffffff;
   --pend:#3a331a; --pend-ink:#f0e2a8; --up:#4fd06a; --down:#ff6b5c; color-scheme:dark}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px;margin:0}
+[hidden]{display:none!important}
 .wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;display:flex;flex-direction:column;gap:22px}
 header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
 h1{font-family:var(--display);font-weight:800;font-size:2.6rem;margin:0;line-height:1;text-wrap:balance}
@@ -155,6 +156,26 @@ td.treas{color:var(--muted);font-size:.85rem}
 .h2h th{font-family:var(--display);font-size:1.3rem;padding:4px}
 textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px;width:100%;min-height:9rem;box-sizing:border-box;resize:vertical}
 
+/* ceefax */
+.hdr-r{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:flex-end}
+.tt-open{font-family:"VT323",ui-monospace,monospace;font-size:1.15rem;line-height:1;cursor:pointer;background:#000;color:#fff;border:2px solid #000;border-radius:4px;padding:5px 10px;letter-spacing:.04em}
+.tt-open span{color:#ff0}
+.tt-open:hover{color:#0ff}
+.tt-open:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tt{position:fixed;inset:0;z-index:50;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 12px) 12px calc(env(safe-area-inset-bottom,0px) + 12px);color-scheme:dark}
+.tt-screen{--cell:min(calc((100vw - 24px)/40/0.6),calc((100vh - 120px)/24/1.05),34px);font-family:"VT323",ui-monospace,monospace;font-size:var(--cell);line-height:1.05;color:#fff;white-space:pre;position:relative;text-shadow:0 0 6px rgba(255,255,255,.25)}
+.tt-screen::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(to bottom,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.28) 3px)}
+.tt-screen .l{display:block;height:1.05em}
+.tt-screen .dh{display:block;height:2.1em;transform:scaleY(2);transform-origin:top;font-size:1em}
+.k-w{color:#fff}.k-y{color:#ff0}.k-c{color:#0ff}.k-g{color:#0f0}.k-r{color:#f22}.k-m{color:#f0f}.k-b{color:#36f}
+.b-b{background:#00f}.b-r{background:#f00}.b-g{background:#0a0}.b-y{background:#ff0;color:#000}.b-c{background:#0ff;color:#000}.b-m{background:#f0f}
+.tt-bar{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.tt-bar button{font-family:"VT323",ui-monospace,monospace;font-size:1.3rem;border:none;border-radius:3px;padding:4px 14px;cursor:pointer;color:#000;min-width:5.5rem}
+.tt-bar .r{background:#f22}.tt-bar .g{background:#0f0}.tt-bar .y{background:#ff0}.tt-bar .c{background:#0ff}
+.tt-bar .x{background:#333;color:#fff}
+.tt-bar button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){.tt-screen.flick{animation:ttf .25s steps(2)}@keyframes ttf{0%{opacity:.2}100%{opacity:1}}}
+
 /* desk */
 .desk{border:2px dashed var(--accent)}
 .desk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -195,8 +216,16 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
       <h1>OAKWOOD <span>SYNDICATE</span></h1>
       <p class="sub">Season <span id="season">2026/27</span> · £1 each, one game each, every week.</p>
     </div>
-    <div class="chips" id="chips"></div>
+    <div class="hdr-r"><div class="chips" id="chips"></div><button class="tt-open" id="tt-open" type="button" aria-label="Switch to Ceefax view"><span>P302</span> Ceefax view</button></div>
   </header>
+
+  <div class="tt" id="tt" hidden role="dialog" aria-modal="true" aria-label="Ceefax view">
+    <div class="tt-screen" id="tt-screen"></div>
+    <div class="tt-bar">
+      <button data-p="302" class="r">Table</button><button data-p="303" class="g">Results</button><button data-p="304" class="y">Awards</button><button data-p="305" class="c">9-fold</button>
+      <button id="tt-exit" class="x">Exit</button>
+    </div>
+  </div>
 
   <section class="board" aria-labelledby="lt-h">
     <div class="board-top">
@@ -346,7 +375,121 @@ function render(){
   renderRecords(ps,computed,now);
   renderH2H(ps,computed,now);
   renderGrid(ps,computed);
+  TTD={ps,computed,now,prev,lastN};
+  if(!$("tt").hidden)ttDraw();
 }
+
+/* ---------- OAKFAX (Ceefax view) ---------- */
+let TTD=null, ttPage=302, ttClock=null, ttTyped="", ttRoll=null;
+const TT_PAGES=[302,303,304,305];
+const P=(s,n)=>{s=String(s??"");return s.length>n?s.slice(0,n):s+" ".repeat(n-s.length)};
+const RP=(s,n)=>{s=String(s??"");return s.length>n?s.slice(0,n):" ".repeat(n-s.length)+s};
+const sg=(t,c)=>`<span class="${c||"k-w"}">${esc(t)}</span>`;
+const LN=(...s)=>`<span class="l">${s.join("")||" "}</span>`;
+const DH=(...s)=>`<span class="dh">${s.join("")}</span>`;
+const BLANK=LN(" ");
+function shortName(p){const n=fullName(p).trim().split(/\s+/);return(n.length>1?n[0][0]+" "+n.slice(1).join(" "):n[0]).toUpperCase()}
+function ttHeader(shown){
+  const d=new Date(), days=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], mons=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const z=n=>String(n).padStart(2,"0");
+  const date=`${days[d.getDay()]} ${z(d.getDate())} ${mons[d.getMonth()]}`, time=`${z(d.getHours())}:${z(d.getMinutes())}/${z(d.getSeconds())}`;
+  const pslot=ttTyped?P("P"+ttTyped,4):"P"+ttPage;
+  return LN(sg(pslot+"  ","k-w"),sg(P("OAKFAX "+(shown||ttPage),15),"k-y"),sg(date+" ","k-w"),sg(time,"k-y"));
+}
+function ttBanner(text,bg){return DH(sg(P(" "+text,40),bg))}
+function ttBody(){
+  if(!TTD||!TTD.computed.length)return[LN(sg(" NO DATA YET","k-y"))];
+  const {ps,computed,now,lastN}=TTD, out=[];
+  if(ttPage===302){
+    out.push(ttBanner("OAKWOOD SYNDICATE","b-b k-y"));
+    out.push(LN(sg(P(" LEAGUE TABLE",28),"k-c"),sg(RP("AFTER WK "+lastN+" ",12),"k-w")));
+    out.push(BLANK);
+    out.push(LN(sg(P(" POS PLAYER",22),"k-g"),sg(RP("WON",4)+RP("L5",5)+RP("PTS",6)+"   ","k-g")));
+    [...ps].sort((a,b)=>now.rankS[a].n-now.rankS[b].n||a.localeCompare(b)).forEach((p,i)=>{
+      const c=now.rankS[p].n===1?"k-y":i%2?"k-c":"k-w";
+      out.push(LN(sg(" "+RP(now.rankS[p].label,3)+" "+P(shortName(p),17),c),sg(RP(now.st[p].correct,4)+RP(now.st[p].last5,5)+RP(now.st[p].score,6)+"   ",c)));
+    });
+    out.push(BLANK);
+    out.push(LN(sg(" WINNER +1  ","k-w"),sg("BANKER +2  ","k-g"),sg("BOTTLER -1","k-r")));
+  }else if(ttPage===303){
+    const withRes=computed.filter(c=>ps.some(p=>resultOf(c.w,p)));const c=withRes[withRes.length-1]||computed[computed.length-1];
+    out.push(ttBanner("FOOTBALL  RESULTS","b-r k-w"));
+    out.push(LN(sg(P(" WEEK "+c.w.n,20),"k-y"),sg(RP((c.w.date||"").toUpperCase()+" ",20),"k-c")));
+    out.push(BLANK);
+    const order=ps.filter(p=>c.w.picks&&c.w.picks[p]).sort((a,b)=>(c.pts[b]??-9)-(c.pts[a]??-9)||(+c.w.picks[b].odds||0)-(+c.w.picks[a].odds||0));
+    order.forEach(p=>{const pk=c.w.picks[p], r=pk.result, v=c.pts[p];
+      const col=r==="W"?(v===2?"k-y":"k-g"):r==="L"?(v===-1?"k-m":"k-r"):"k-w";
+      out.push(LN(sg(" "+P(p,3),"k-c"),sg(P((pk.team||"").toUpperCase(),13),"k-w"),sg(RP(pk.score||(r?"":"v"),5),"k-y"),sg(RP(pk.odds!=null?(+pk.odds).toFixed(2):"",6),"k-w"),sg(RP(r==="W"?"WON":r==="L"?"LOST":r==="V"?"VOID":"",6),col),sg(RP(v==null?"":(v>0?"+"+v:String(v)),4)+"  ",col)));
+      if(pk.match)out.push(LN(sg("    "+P(pk.match.toUpperCase(),36),"k-b")));
+    });
+  }else if(ttPage===304){
+    const settled=computed.filter(c=>c.settled), last=settled[settled.length-1];
+    out.push(ttBanner("AWARDS & RECORDS","b-m k-w"));
+    if(last){
+      const bank=ps.filter(p=>last.pts[p]===2), bot=ps.filter(p=>last.pts[p]===-1);
+      out.push(LN(sg(P(" BANKER OF THE WEEK  WK "+last.w.n,40),"k-g")));
+      bank.forEach(p=>{const pk=last.w.picks[p];out.push(LN(sg(" "+P(shortName(p),18),"k-w"),sg(P((pk.team||"").toUpperCase()+" @ "+(+pk.odds).toFixed(2),21),"k-y")))});
+      out.push(LN(sg(" LONGEST-ODDS WINNER. +2 POINTS","k-c")));
+      out.push(BLANK);
+      out.push(LN(sg(P(" BOTTLER OF THE WEEK  WK "+last.w.n,40),"k-r")));
+      bot.forEach(p=>{const pk=last.w.picks[p];out.push(LN(sg(" "+P(shortName(p),18),"k-w"),sg(P((pk.team||"").toUpperCase()+" @ "+(+pk.odds).toFixed(2),21),"k-y")))});
+      out.push(LN(sg(" SHORTEST-ODDS LOSER. -1 POINT","k-c")));
+      out.push(BLANK);
+      const R=runs(ps,computed), top=f=>{const m=Math.max(...ps.map(f));return{m,who:ps.filter(p=>f(p)===m)}};
+      const sw=top(p=>R[p].bestW), sl=top(p=>R[p].bestL);
+      const t=Object.fromEntries(ps.map(p=>[p,0]));settled.forEach(c=>ps.forEach(p=>{if(c.pts[p]===2)t[p]++}));
+      const mb=top(p=>t[p]);
+      const rec=(k,v,who,c)=>LN(sg(" "+P(k,17),"k-w"),sg(RP(v,4)+"  ","k-y"),sg(P(who.map(shortName).join(", "),17),c));
+      out.push(LN(sg(" SEASON RECORDS","k-g")));
+      out.push(rec("WINNING RUN",sw.m,sw.who,"k-c"));
+      out.push(rec("LOSING RUN",sl.m,sl.who,"k-r"));
+      out.push(rec("MOST BANKERS",mb.m,mb.who,"k-c"));
+    }
+  }else if(ttPage===305){
+    out.push(ttBanner("THE  9-FOLD","b-g k-y"));
+    out.push(LN(sg(" EVERY PICK IN ONE ACCUMULATOR","k-c")));
+    out.push(BLANK);
+    out.push(LN(sg(P(" WK LEGS",15),"k-g"),sg(RP("WON",5)+RP("WOULD PAY",13)+"  ","k-g")));
+    computed.slice().reverse().slice(0,12).forEach(c=>{const a=accaFor(c,ps);if(!a.picks.length)return;
+      const legs=a.picks.map(p=>{const r=resultOf(c.w,p);return sg("▌",r==="W"?"k-g":r==="L"?"k-r":"k-w")}).join("");
+      const pay=a.ret!=null?"£"+Math.round(a.ret).toLocaleString("en-GB"):"-";
+      out.push(LN(sg(" "+RP(c.w.n,2)+" ","k-w"),legs,sg(" ".repeat(Math.max(0,11-a.picks.length)),"k-w"),sg(RP(a.won+"/"+a.picks.length,5),a.landed?"k-y":"k-w"),sg(RP(pay,13)+(a.est?" *":"  "),"k-c")));
+    });
+    out.push(BLANK);
+    out.push(LN(sg(" * WORKED OUT FROM THE PRICES","k-m")));
+  }
+  return out;
+}
+function ttDraw(shown){
+  const body=ttBody(); const rows=[ttHeader(shown),...body];
+  let used=rows.reduce((n,r)=>n+(r.startsWith('<span class="dh">')?2:1),0);
+  while(used<23){rows.push(BLANK);used++}
+  rows.push(LN(sg(P(" Table",10),"k-r"),sg(P("Results",10),"k-g"),sg(P("Awards",10),"k-y"),sg(P("9-fold",10),"k-c")));
+  $("tt-screen").innerHTML=rows.join("");
+}
+function ttGo(p){
+  if(!TT_PAGES.includes(p))return;
+  const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+  clearInterval(ttRoll);ttTyped="";
+  if(reduce||p===ttPage){ttPage=p;ttDraw();return}
+  let n=ttPage;const step=p>n?1:-1;ttPage=p;
+  ttRoll=setInterval(()=>{n+=step;ttDraw(n);if(n===p){clearInterval(ttRoll);ttRoll=null;const s=$("tt-screen");s.classList.remove("flick");void s.offsetWidth;s.classList.add("flick")}},90);
+}
+function ttOpen(){
+  $("tt").hidden=false;document.body.style.overflow="hidden";ttDraw();
+  clearInterval(ttClock);ttClock=setInterval(()=>{if(!ttRoll)ttDraw()},1000);
+  document.querySelector(".tt-bar button").focus();
+}
+function ttClose(){$("tt").hidden=true;document.body.style.overflow="";clearInterval(ttClock);clearInterval(ttRoll);ttTyped="";$("tt-open").focus()}
+$("tt-open").addEventListener("click",ttOpen);
+$("tt-exit").addEventListener("click",ttClose);
+document.querySelectorAll(".tt-bar button[data-p]").forEach(b=>b.addEventListener("click",()=>ttGo(+b.dataset.p)));
+document.addEventListener("keydown",e=>{
+  if($("tt").hidden)return;
+  if(e.key==="Escape"){ttClose();return}
+  if(e.key==="ArrowRight"||e.key==="ArrowLeft"){const i=TT_PAGES.indexOf(ttPage),j=(i+(e.key==="ArrowRight"?1:TT_PAGES.length-1))%TT_PAGES.length;ttGo(TT_PAGES[j]);return}
+  if(/^[0-9]$/.test(e.key)){ttTyped+=e.key;if(ttTyped.length===3){const p=+ttTyped;ttTyped="";if(TT_PAGES.includes(p))ttGo(p);else ttDraw()}else ttDraw()}
+});
 
 const nm=p=>esc(fullName(p));
 const joinNames=a=>a.length<=2?a.map(nm).join(" & "):a.slice(0,-1).map(nm).join(", ")+" & "+nm(a[a.length-1]);
