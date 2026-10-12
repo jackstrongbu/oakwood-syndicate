@@ -120,6 +120,7 @@ td.treas{color:var(--muted);font-size:.85rem}
 .award .k{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;opacity:.85}
 .award .v{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1.05}
 .award .d{font-size:.85rem}
+.award .def{font-size:.78rem;opacity:.85;margin-top:6px;padding-top:6px;border-top:1px solid currentColor;border-top-color:color-mix(in srgb,currentColor 25%,transparent)}
 .tally{min-width:0}
 .tally td,.tally th{padding:5px 8px}
 .tally td.nm2{text-align:left;font-weight:600}
@@ -356,8 +357,8 @@ function renderAwards(ps,computed){
   if(!settled.length){$("awards").innerHTML=`<p class="how">Awards appear once a week is settled.</p>`;$("tally").innerHTML="";return}
   const last=settled[settled.length-1];
   const bank=ps.filter(p=>last.pts[p]===2), bot=ps.filter(p=>last.pts[p]===-1);
-  const card=(cls,k,list,empty)=>`<div class="award ${cls}"><span class="k">${k} · week ${last.w.n}</span>${list.length?`<span class="v">${joinNames(list)}</span>${list.map(p=>`<span class="d">${pickLine(last.w,p)}</span>`).join("")}`:`<span class="v">${empty}</span>`}</div>`;
-  $("awards").innerHTML=card("bank","Banker of the week",bank,"Nobody won")+card("bottle","Bottler of the week",bot,"Nobody lost");
+  const card=(cls,k,def,list,empty)=>`<div class="award ${cls}"><span class="k">${k} · week ${last.w.n}</span>${list.length?`<span class="v">${joinNames(list)}</span>${list.map(p=>`<span class="d">${pickLine(last.w,p)}</span>`).join("")}`:`<span class="v">${empty}</span>`}<span class="def">${def}</span></div>`;
+  $("awards").innerHTML=card("bank","Banker of the week","The winning pick at the longest odds. Worth +2 points instead of +1.",bank,"Nobody won")+card("bottle","Bottler of the week","The losing pick at the shortest odds, the one that should have come in. Costs −1 point.",bot,"Nobody lost");
   const t=Object.fromEntries(ps.map(p=>[p,{b:0,o:0}]));
   settled.forEach(c=>ps.forEach(p=>{if(c.pts[p]===2)t[p].b++;if(c.pts[p]===-1)t[p].o++}));
   const order=[...ps].sort((a,b)=>t[b].b-t[a].b||t[a].o-t[b].o||a.localeCompare(b));
