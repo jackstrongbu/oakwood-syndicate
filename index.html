@@ -111,6 +111,49 @@ td.treas{color:var(--muted);font-size:.85rem}
 .fx .od{font-family:var(--mono);font-size:.72rem;opacity:.8}
 .fx .pt{font-family:var(--display);font-weight:800;font-size:.95rem}
 
+/* awards */
+.awards{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){.awards{grid-template-columns:1fr}}
+.award{border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0}
+.award.bank{background:var(--best);color:var(--best-ink)}
+.award.bottle{background:var(--worst);color:var(--worst-ink)}
+.award .k{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;opacity:.85}
+.award .v{font-family:var(--display);font-weight:800;font-size:1.7rem;line-height:1.05}
+.award .d{font-size:.85rem}
+.tally{min-width:0}
+.tally td,.tally th{padding:5px 8px}
+.tally td.nm2{text-align:left;font-weight:600}
+/* acca */
+.acca{min-width:520px}
+.acca th{font-family:var(--display);font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:left;padding:4px 8px;border-bottom:1px solid var(--rule);font-size:.85rem}
+.acca td{padding:8px;border-bottom:1px solid var(--rule)}
+.acca .r{text-align:right}
+.legs{display:flex;gap:3px}
+.legs i{width:14px;height:14px;border-radius:50%;background:var(--loss);border:1px solid rgba(0,0,0,.08)}
+.legs i.w{background:var(--best)} .legs i.p{background:var(--pend)}
+.acca .num{font-family:var(--mono)}
+.acca tr.close td{background:var(--soft)}
+.tag{display:inline-block;font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--soft);color:var(--muted);border:1px solid var(--rule)}
+.tag.est{font-weight:400}
+/* records + h2h */
+.duo{display:grid;grid-template-columns:3fr 2fr;gap:22px}
+@media (max-width:900px){.duo{grid-template-columns:1fr}}
+.sub-h{margin:4px 0 0;font-family:var(--display);font-size:1rem;letter-spacing:.06em;text-transform:uppercase}
+.sub-h.fame{color:var(--up)} .sub-h.shame{color:var(--down)}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.tile{background:var(--soft);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.tile .k{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.tile .v{font-family:var(--display);font-weight:800;font-size:1.5rem;line-height:1.1}
+.tile .w{font-size:.8rem;font-weight:600}
+.tile .x{font-size:.75rem;color:var(--muted)}
+.vs{font-family:var(--display);font-weight:800;color:var(--muted)}
+.h2h{width:100%}
+.h2h td{padding:7px 6px;border-bottom:1px solid var(--rule);text-align:center;font-family:var(--mono)}
+.h2h td.lab{font-family:var(--body);font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.h2h td.better{color:var(--up);font-weight:600}
+.h2h th{font-family:var(--display);font-size:1.3rem;padding:4px}
+textarea{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px;width:100%;min-height:9rem;box-sizing:border-box;resize:vertical}
+
 /* desk */
 .desk{border:2px dashed var(--accent)}
 .desk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
@@ -177,6 +220,33 @@ input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid 
     </div>
     <div class="results" id="results"></div>
   </section>
+
+  <section class="panel" aria-labelledby="aw-h">
+    <h2 id="aw-h">Awards</h2>
+    <div class="awards" id="awards"></div>
+    <div class="scroll"><table class="grid tally" id="tally"></table></div>
+  </section>
+
+  <section class="panel" aria-labelledby="ac-h">
+    <div><h2 id="ac-h">The 9-fold</h2><div class="rs-meta" id="ac-meta"></div></div>
+    <div class="scroll"><table class="acca" id="acca"></table></div>
+    <p class="how">Weeks with a bet slip show the bookie's figures. Earlier weeks are worked out from the nine prices multiplied together on a £9 stake.</p>
+  </section>
+
+  <div class="duo">
+    <section class="panel" aria-labelledby="rc-h">
+      <h2 id="rc-h">Records</h2>
+      <h3 class="sub-h fame">Hall of fame</h3>
+      <div class="tiles" id="fame"></div>
+      <h3 class="sub-h shame">Hall of shame</h3>
+      <div class="tiles" id="shame"></div>
+    </section>
+    <section class="panel" aria-labelledby="h2h-h">
+      <h2 id="h2h-h">Head to head</h2>
+      <div class="row"><select id="h2h-a" aria-label="First player"></select><span class="vs">v</span><select id="h2h-b" aria-label="Second player"></select></div>
+      <table class="h2h" id="h2h"></table>
+    </section>
+  </div>
 
   <section class="panel">
     <h2>Picks</h2>
@@ -270,8 +340,117 @@ function render(){
   const prev=prevN!=null?standings(ps,computed,prevN):null;
   renderLeague(ps,now,prev,lastN);
   renderResults(ps,computed);
+  renderAwards(ps,computed);
+  renderAcca(ps,computed);
+  renderRecords(ps,computed,now);
+  renderH2H(ps,computed,now);
   renderGrid(ps,computed);
 }
+
+const nm=p=>esc(fullName(p));
+const joinNames=a=>a.length<=2?a.map(nm).join(" & "):a.slice(0,-1).map(nm).join(", ")+" & "+nm(a[a.length-1]);
+function pickLine(w,p){const pk=w.picks[p];return [pk.team?esc(pk.team):"",pk.odds!=null?"@ "+(+pk.odds).toFixed(2):"",pk.match&&pk.score?"· "+esc(pk.match)+" "+esc(pk.score):""].filter(Boolean).join(" ")}
+
+function renderAwards(ps,computed){
+  const settled=computed.filter(c=>c.settled);
+  if(!settled.length){$("awards").innerHTML=`<p class="how">Awards appear once a week is settled.</p>`;$("tally").innerHTML="";return}
+  const last=settled[settled.length-1];
+  const bank=ps.filter(p=>last.pts[p]===2), bot=ps.filter(p=>last.pts[p]===-1);
+  const card=(cls,k,list,empty)=>`<div class="award ${cls}"><span class="k">${k} · week ${last.w.n}</span>${list.length?`<span class="v">${joinNames(list)}</span>${list.map(p=>`<span class="d">${pickLine(last.w,p)}</span>`).join("")}`:`<span class="v">${empty}</span>`}</div>`;
+  $("awards").innerHTML=card("bank","Banker of the week",bank,"Nobody won")+card("bottle","Bottler of the week",bot,"Nobody lost");
+  const t=Object.fromEntries(ps.map(p=>[p,{b:0,o:0}]));
+  settled.forEach(c=>ps.forEach(p=>{if(c.pts[p]===2)t[p].b++;if(c.pts[p]===-1)t[p].o++}));
+  const order=[...ps].sort((a,b)=>t[b].b-t[a].b||t[a].o-t[b].o||a.localeCompare(b));
+  const maxB=Math.max(...ps.map(p=>t[p].b)), maxO=Math.max(...ps.map(p=>t[p].o));
+  $("tally").innerHTML=`<thead><tr><th>Season tally</th><th>Banker</th><th>Bottler</th></tr></thead><tbody>`+order.map(p=>`<tr><td class="nm2">${nm(p)}</td><td class="${t[p].b&&t[p].b===maxB?"best":""}">${t[p].b}</td><td class="${t[p].o&&t[p].o===maxO?"worst":""}">${t[p].o}</td></tr>`).join("")+"</tbody>";
+}
+
+function accaFor(c,ps){
+  const picks=ps.filter(p=>c.w.picks&&c.w.picks[p]);
+  const won=picks.filter(p=>resultOf(c.w,p)==="W").length, lost=picks.filter(p=>resultOf(c.w,p)==="L").length;
+  const priced=picks.every(p=>c.w.picks[p].odds!=null);
+  let odds=c.w.acca&&c.w.acca.odds, stake=c.w.acca&&c.w.acca.stake, ret=c.w.acca&&c.w.acca.returns, est=false;
+  if(odds==null&&priced&&picks.length){odds=picks.reduce((s,p)=>s*(+c.w.picks[p].odds),1);stake=picks.length;ret=odds*stake;est=true}
+  return{picks,won,lost,odds,stake,ret,est,landed:picks.length>0&&won===picks.length,dead:lost>0};
+}
+function renderAcca(ps,computed){
+  const rows=computed.map(c=>({c,a:accaFor(c,ps)})).filter(r=>r.a.picks.length);
+  const done=rows.filter(r=>r.c.settled);
+  const hi=done.length?Math.max(...done.map(r=>r.a.won)):null, closest=done.filter(r=>r.a.won===hi), best=closest[closest.length-1]||null;
+  $("ac-meta").textContent=done.some(r=>r.a.landed)?"It's landed!":best?`Closest call so far: ${hi} of ${best.a.picks.length} (week${closest.length>1?"s":""} ${closest.map(r=>r.c.w.n).join(" & ")})`:"";
+  let h=`<thead><tr><th>Wk</th><th>Legs</th><th class="r">Won</th><th class="r">Odds</th><th class="r">Would have paid</th><th>Verdict</th></tr></thead><tbody>`;
+  rows.slice().reverse().forEach(({c,a})=>{
+    const legs=a.picks.map(p=>{const r=resultOf(c.w,p);return`<i class="${r==="W"?"w":r==="L"?"":"p"}" title="${esc(fullName(p))}: ${esc(c.w.picks[p].team||"")} ${r||"pending"}"></i>`}).join("");
+    const verdict=a.landed?"Landed":c.settled?(a.won>=a.picks.length-1?"Agony":a.won>=Math.ceil(a.picks.length/2)?"Not bad":"Binned"):a.dead?"Dead":"Still alive";
+    h+=`<tr class="${closest.some(r=>r.c===c)?"close":""}"><td class="num">${c.w.n}</td><td><div class="legs">${legs}</div></td><td class="r num">${a.won}/${a.picks.length}</td><td class="r num">${a.odds!=null?Number(a.odds).toLocaleString("en-GB",{maximumFractionDigits:2}):"–"}</td><td class="r num">${a.ret!=null?"£"+Number(a.ret).toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2}):"–"} ${a.est?'<span class="tag est">calc</span>':""}</td><td><span class="tag">${verdict}</span></td></tr>`;
+  });
+  $("acca").innerHTML=h+"</tbody>";
+}
+
+function runs(ps,computed){
+  const out={};
+  ps.forEach(p=>{let w=0,l=0,bw=0,bl=0;
+    computed.forEach(c=>{const r=resultOf(c.w,p);if(r==="W"){w++;l=0}else if(r==="L"){l++;w=0}bw=Math.max(bw,w);bl=Math.max(bl,l)});
+    out[p]={bestW:bw,bestL:bl,curW:w,curL:l}});
+  return out;
+}
+function tile(k,v,who,extra){return`<div class="tile"><span class="k">${k}</span><span class="v">${v}</span><span class="w">${who}</span>${extra?`<span class="x">${extra}</span>`:""}</div>`}
+function renderRecords(ps,computed,now){
+  const settled=computed.filter(c=>c.settled);
+  if(!settled.length){$("fame").innerHTML=$("shame").innerHTML="";return}
+  const R=runs(ps,computed);
+  const top=(f)=>{const m=Math.max(...ps.map(f));return{m,who:ps.filter(p=>f(p)===m)}};
+  const bot=(f)=>{const m=Math.min(...ps.map(f));return{m,who:ps.filter(p=>f(p)===m)}};
+  const all=[];computed.forEach(c=>ps.forEach(p=>{const pk=c.w.picks&&c.w.picks[p];if(pk&&pk.odds!=null&&(pk.result==="W"||pk.result==="L"))all.push({o:+pk.odds,p,c,r:pk.result})}));
+  const Ws=all.filter(x=>x.r==="W"), Ls=all.filter(x=>x.r==="L");
+  const bigO=Ws.length?Math.max(...Ws.map(x=>x.o)):null, shortO=Ls.length?Math.min(...Ls.map(x=>x.o)):null;
+  const bigWs=Ws.filter(x=>x.o===bigO), shortLs=Ls.filter(x=>x.o===shortO);
+  const bigW=bigWs[0]||null, shortL=shortLs[0]||null;
+  const wk=settled.map(c=>({c,w:ps.filter(p=>resultOf(c.w,p)==="W").length}));
+  const hiW=Math.max(...wk.map(x=>x.w)), loW=Math.min(...wk.map(x=>x.w));
+  const wkList=v=>{const l=wk.filter(x=>x.w===v).map(x=>x.c.w.n);return(l.length>1?"Weeks ":"Week ")+l.join(" & ")};
+  const sw=top(p=>R[p].bestW), sl=top(p=>R[p].bestL), lead=top(p=>now.st[p].score), floor=bot(p=>now.st[p].score);
+  const cur=p=>R[p].curW===R[p].bestW&&R[p].curW>1?" (still going)":"";
+  const curL=p=>R[p].curL===R[p].bestL&&R[p].curL>1?" (still going)":"";
+  const desc1=x=>`Week ${x.c.w.n}${x.c.w.picks[x.p].team?" · "+esc(x.c.w.picks[x.p].team):""}`;
+  const desc=list=>list.map(desc1).join("; ");
+  const who=list=>joinNames([...new Set(list.map(x=>x.p))]);
+  $("fame").innerHTML=
+    tile("Longest winning run",sw.m,joinNames(sw.who),sw.who.length===1?cur(sw.who[0]).trim():"")+
+    tile("Biggest winner",bigW?bigW.o.toFixed(2):"–",who(bigWs),desc(bigWs))+
+    tile("Best syndicate week",`${hiW}/${ps.length}`,wkList(hiW),"winners in a week")+
+    tile("Top of the pile",lead.m+" pts",joinNames(lead.who),"");
+  $("shame").innerHTML=
+    tile("Longest losing run",sl.m,joinNames(sl.who),sl.who.length===1?curL(sl.who[0]).trim():"")+
+    tile("Biggest bottle",shortL?shortL.o.toFixed(2):"–",who(shortLs),shortLs.length?"Lost at the shortest price · "+desc(shortLs):"")+
+    tile("Worst syndicate week",`${loW}/${ps.length}`,wkList(loW),"winners in a week")+
+    tile("Propping up the table",floor.m+" pts",joinNames(floor.who),"");
+}
+
+let h2hInit=false;
+function renderH2H(ps,computed,now){
+  const A=$("h2h-a"),B=$("h2h-b");
+  if(!h2hInit||A.options.length!==ps.length){
+    const order=[...ps].sort((a,b)=>now.rankS[a].n-now.rankS[b].n);
+    const opts=ps.map(p=>`<option value="${p}">${nm(p)}</option>`).join("");
+    const a0=A.value||order[0], b0=B.value||order[1];A.innerHTML=opts;B.innerHTML=opts;A.value=a0;B.value=b0;h2hInit=true;
+  }
+  const a=A.value,b=B.value,st=now.st,R=runs(ps,computed);
+  let aw=0,bw=0,lv=0;
+  computed.filter(c=>c.settled).forEach(c=>{const x=c.pts[a]||0,y=c.pts[b]||0;if(x>y)aw++;else if(y>x)bw++;else lv++});
+  const big=p=>{let m=null;computed.forEach(c=>{const pk=c.w.picks&&c.w.picks[p];if(pk&&pk.result==="W"&&pk.odds!=null&&(m==null||+pk.odds>m))m=+pk.odds});return m};
+  const row=(lab,x,y,hi=true,f=v=>v)=>{const bx=x!=null&&y!=null&&(hi?x>y:x<y),by=x!=null&&y!=null&&(hi?y>x:y<x);return`<tr><td class="${bx?"better":""}">${x==null?"–":f(x)}</td><td class="lab">${lab}</td><td class="${by?"better":""}">${y==null?"–":f(y)}</td></tr>`};
+  $("h2h").innerHTML=`<thead><tr><th>${esc(a)}</th><th></th><th>${esc(b)}</th></tr></thead><tbody>`+
+    row("Points",st[a].score,st[b].score)+
+    row("Weeks won v each other",aw,bw)+
+    row("Winners picked",st[a].correct,st[b].correct)+
+    row("Avg winning odds",st[a].cAvg,st[b].cAvg,true,fmt)+
+    row("Biggest winner",big(a),big(b),true,v=>v.toFixed(2))+
+    row("Last 5",st[a].last5,st[b].last5)+
+    row("Longest winning run",R[a].bestW,R[b].bestW)+
+    `<tr><td colspan="3" class="lab" style="text-align:center">${lv} week${lv===1?"":"s"} level</td></tr></tbody>`;
+}
+["h2h-a","h2h-b"].forEach(id=>$(id).addEventListener("change",render));
 
 function renderResults(ps,computed){
   const sel=$("rs-week"), cur=sel.value;
@@ -339,7 +518,7 @@ function setLeague(v){league=v;TABS.forEach(([id,k])=>$(id).setAttribute("aria-p
 TABS.forEach(([id,v])=>$(id).addEventListener("click",()=>{setLeague(v);try{localStorage.setItem("league",v)}catch(e){}render()}));
 try{const s=localStorage.getItem("league");if(TABS.some(([,k])=>k===s))setLeague(s)}catch(e){}
 
-const DATA={"meta":{"name":"Oakwood Syndicate","names":{"CJ":"Charlie Johnson","CR":"Tighty Tufnell","JS":"Jack Strong","MP":"Matt Patey","OC":"Oliver Cole","PM":"Paul Monan","TC":"Tom Cronk","TG":"Thomas Gillespie","WD":"Will Dolton"},"players":["CJ","CR","JS","MP","OC","PM","TG","TC","WD"],"season":"2026/27","stake":1,"treasurer":"Cronk","updated":"12 Oct 2026","uploader":"JS"},"weeks":[{"n":1,"picks":{"CJ":{"odds":1.67,"result":"L"},"CR":{"odds":1.91,"result":"W"},"JS":{"odds":2.45,"result":"L"},"MP":{"odds":2.4,"result":"L"},"OC":{"odds":2.15,"result":"L"},"PM":{"odds":1.67,"result":"W"},"TC":{"odds":2.25,"result":"W"},"TG":{"odds":1.91,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":2,"picks":{"CJ":{"odds":2.63,"result":"W"},"CR":{"odds":2.9,"result":"W"},"JS":{"odds":2.1,"result":"L"},"MP":{"odds":2.25,"result":"W"},"OC":{"odds":2.7,"result":"L"},"PM":{"odds":1.91,"result":"L"},"TC":{"odds":1.73,"result":"L"},"TG":{"odds":2,"result":"L"},"WD":{"odds":2.25,"result":"W"}},"treasurer":"Cronk"},{"n":3,"picks":{"CJ":{"odds":1.95,"result":"L"},"CR":{"odds":1.57,"result":"W"},"JS":{"odds":1.87,"result":"L"},"MP":{"odds":2.5,"result":"L"},"OC":{"odds":1.91,"result":"W"},"PM":{"odds":2.5,"result":"L"},"TC":{"odds":2.2,"result":"L"},"TG":{"odds":3.6,"result":"W"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":4,"picks":{"CJ":{"odds":3.6,"result":"L"},"CR":{"odds":1.67,"result":"W"},"JS":{"odds":2,"result":"W"},"MP":{"odds":1.8,"result":"W"},"OC":{"odds":1.8,"result":"L"},"PM":{"odds":2.05,"result":"W"},"TC":{"odds":3.5,"result":"W"},"TG":{"odds":3.1,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":5,"picks":{"CJ":{"odds":1.57,"result":"W"},"CR":{"odds":1.95,"result":"L"},"JS":{"odds":1.53,"result":"W"},"MP":{"odds":1.87,"result":"W"},"OC":{"odds":1.9,"result":"L"},"PM":{"odds":1.8,"result":"W"},"TC":{"odds":2.1,"result":"W"},"TG":{"odds":2.9,"result":"L"},"WD":{"odds":2.4,"result":"W"}},"treasurer":"Cronk"},{"n":6,"picks":{"CJ":{"odds":2.4,"result":"L"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.62,"result":"L"},"MP":{"odds":2.63,"result":"L"},"OC":{"odds":2,"result":"L"},"PM":{"odds":2.1,"result":"L"},"TC":{"odds":1.7,"result":"L"},"TG":{"odds":2.05,"result":"L"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":7,"picks":{"CJ":{"odds":2,"result":"W"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.83,"result":"W"},"MP":{"odds":1.67,"result":"L"},"OC":{"odds":2.63,"result":"L"},"PM":{"odds":3.25,"result":"W"},"TC":{"odds":2.38,"result":"L"},"TG":{"odds":2.63,"result":"L"},"WD":{"odds":2.8,"result":"W"}},"treasurer":"Cronk"},{"date":"19 Sep 2026","n":8,"picks":{"CJ":{"match":"Burnley v Derby","odds":1.8,"result":"L","score":"1\u20131","team":"BURNLEY"},"CR":{"match":"Wrexham v Southampton","odds":2.4,"result":"L","score":"2\u20131","team":"SAINTS"},"JS":{"match":"Sheff Wed v Stockport","odds":2.8,"result":"L","score":"0\u20130","team":"WEDS"},"MP":{"match":"Oxford v Cambridge","odds":2,"result":"L","score":"1\u20131","team":"OXFORD"},"OC":{"match":"St Mirren v Dundee Utd","odds":2.4,"result":"L","score":"0\u20133","team":"ST MIRREN"},"PM":{"match":"Everton v Ipswich","odds":1.75,"result":"W","score":"1\u20130","team":"EVERTON"},"TC":{"match":"Stirling v Clyde","odds":1.62,"result":"L","score":"1\u20131","team":"CLYDE"},"TG":{"match":"QPR v Preston","odds":1.73,"result":"L","score":"2\u20132","team":"QPR"},"WD":{"match":"Woking v Kidderminster","odds":2.75,"result":"L","score":"0\u20130","team":"KIDDY"}},"treasurer":"Cronk"},{"date":"10 Oct 2026","n":9,"picks":{"CJ":{"match":"Derby v Wrexham","odds":2.3,"result":"L","score":"1\u20131","team":"WREXHAM"},"CR":{"match":"Ayr v Dunfermline","odds":2.15,"result":"L","score":"1\u20131","team":"DUNFERMLINE"},"JS":{"match":"Alloa v Hamilton","odds":1.8,"result":"W","score":"0\u20133","team":"HAMILTON"},"MP":{"match":"Boston Utd v Southend","odds":1.67,"result":"W","score":"1\u20132","team":"SOUTHEND"},"OC":{"match":"Stevenage v Wigan","odds":2,"result":"W","score":"1\u20130","team":"STEVENAGE"},"PM":{"match":"Blackburn v Cardiff","odds":2.3,"result":"L","score":"2\u20131","team":"CARDIFF"},"TC":{"match":"Hearts v St Mirren","odds":1.44,"result":"W","score":"5\u20130","team":"HEARTS"},"TG":{"match":"Falkirk v Dundee","odds":1.87,"result":"L","score":"1\u20132","team":"FALKIRK"},"WD":{"match":"Woking v Harrogate","odds":2.1,"result":"W","score":"0\u20131","team":"HARROGATE"}},"treasurer":"Cronk"}]};
+const DATA={"meta":{"name":"Oakwood Syndicate","names":{"CJ":"Charlie Johnson","CR":"Tighty Tufnell","JS":"Jack Strong","MP":"Matt Patey","OC":"Oliver Cole","PM":"Paul Monan","TC":"Tom Cronk","TG":"Thomas Gillespie","WD":"Will Dolton"},"players":["CJ","CR","JS","MP","OC","PM","TG","TC","WD"],"season":"2026/27","stake":1,"treasurer":"Cronk","updated":"12 Oct 2026","uploader":"JS"},"weeks":[{"n":1,"picks":{"CJ":{"odds":1.67,"result":"L"},"CR":{"odds":1.91,"result":"W"},"JS":{"odds":2.45,"result":"L"},"MP":{"odds":2.4,"result":"L"},"OC":{"odds":2.15,"result":"L"},"PM":{"odds":1.67,"result":"W"},"TC":{"odds":2.25,"result":"W"},"TG":{"odds":1.91,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":2,"picks":{"CJ":{"odds":2.63,"result":"W"},"CR":{"odds":2.9,"result":"W"},"JS":{"odds":2.1,"result":"L"},"MP":{"odds":2.25,"result":"W"},"OC":{"odds":2.7,"result":"L"},"PM":{"odds":1.91,"result":"L"},"TC":{"odds":1.73,"result":"L"},"TG":{"odds":2,"result":"L"},"WD":{"odds":2.25,"result":"W"}},"treasurer":"Cronk"},{"n":3,"picks":{"CJ":{"odds":1.95,"result":"L"},"CR":{"odds":1.57,"result":"W"},"JS":{"odds":1.87,"result":"L"},"MP":{"odds":2.5,"result":"L"},"OC":{"odds":1.91,"result":"W"},"PM":{"odds":2.5,"result":"L"},"TC":{"odds":2.2,"result":"L"},"TG":{"odds":3.6,"result":"W"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":4,"picks":{"CJ":{"odds":3.6,"result":"L"},"CR":{"odds":1.67,"result":"W"},"JS":{"odds":2,"result":"W"},"MP":{"odds":1.8,"result":"W"},"OC":{"odds":1.8,"result":"L"},"PM":{"odds":2.05,"result":"W"},"TC":{"odds":3.5,"result":"W"},"TG":{"odds":3.1,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":5,"picks":{"CJ":{"odds":1.57,"result":"W"},"CR":{"odds":1.95,"result":"L"},"JS":{"odds":1.53,"result":"W"},"MP":{"odds":1.87,"result":"W"},"OC":{"odds":1.9,"result":"L"},"PM":{"odds":1.8,"result":"W"},"TC":{"odds":2.1,"result":"W"},"TG":{"odds":2.9,"result":"L"},"WD":{"odds":2.4,"result":"W"}},"treasurer":"Cronk"},{"n":6,"picks":{"CJ":{"odds":2.4,"result":"L"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.62,"result":"L"},"MP":{"odds":2.63,"result":"L"},"OC":{"odds":2,"result":"L"},"PM":{"odds":2.1,"result":"L"},"TC":{"odds":1.7,"result":"L"},"TG":{"odds":2.05,"result":"L"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":7,"picks":{"CJ":{"odds":2,"result":"W"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.83,"result":"W"},"MP":{"odds":1.67,"result":"L"},"OC":{"odds":2.63,"result":"L"},"PM":{"odds":3.25,"result":"W"},"TC":{"odds":2.38,"result":"L"},"TG":{"odds":2.63,"result":"L"},"WD":{"odds":2.8,"result":"W"}},"treasurer":"Cronk"},{"acca":{"odds":779.63,"returns":7016.7,"stake":9},"date":"19 Sep 2026","n":8,"picks":{"CJ":{"match":"Burnley v Derby","odds":1.8,"result":"L","score":"1\u20131","team":"BURNLEY"},"CR":{"match":"Wrexham v Southampton","odds":2.4,"result":"L","score":"2\u20131","team":"SAINTS"},"JS":{"match":"Sheff Wed v Stockport","odds":2.8,"result":"L","score":"0\u20130","team":"WEDS"},"MP":{"match":"Oxford v Cambridge","odds":2,"result":"L","score":"1\u20131","team":"OXFORD"},"OC":{"match":"St Mirren v Dundee Utd","odds":2.4,"result":"L","score":"0\u20133","team":"ST MIRREN"},"PM":{"match":"Everton v Ipswich","odds":1.75,"result":"W","score":"1\u20130","team":"EVERTON"},"TC":{"match":"Stirling v Clyde","odds":1.62,"result":"L","score":"1\u20131","team":"CLYDE"},"TG":{"match":"QPR v Preston","odds":1.73,"result":"L","score":"2\u20132","team":"QPR"},"WD":{"match":"Woking v Kidderminster","odds":2.75,"result":"L","score":"0\u20130","team":"KIDDY"}},"treasurer":"Cronk"},{"acca":{"odds":387,"returns":3482.96,"stake":9},"date":"10 Oct 2026","n":9,"picks":{"CJ":{"match":"Derby v Wrexham","odds":2.3,"result":"L","score":"1\u20131","team":"WREXHAM"},"CR":{"match":"Ayr v Dunfermline","odds":2.15,"result":"L","score":"1\u20131","team":"DUNFERMLINE"},"JS":{"match":"Alloa v Hamilton","odds":1.8,"result":"W","score":"0\u20133","team":"HAMILTON"},"MP":{"match":"Boston Utd v Southend","odds":1.67,"result":"W","score":"1\u20132","team":"SOUTHEND"},"OC":{"match":"Stevenage v Wigan","odds":2,"result":"W","score":"1\u20130","team":"STEVENAGE"},"PM":{"match":"Blackburn v Cardiff","odds":2.3,"result":"L","score":"2\u20131","team":"CARDIFF"},"TC":{"match":"Hearts v St Mirren","odds":1.44,"result":"W","score":"5\u20130","team":"HEARTS"},"TG":{"match":"Falkirk v Dundee","odds":1.87,"result":"L","score":"1\u20132","team":"FALKIRK"},"WD":{"match":"Woking v Harrogate","odds":2.1,"result":"W","score":"0\u20131","team":"HARROGATE"}},"treasurer":"Cronk"}]};
 meta=DATA.meta;weeks=DATA.weeks;render();
 </script>
 </body></html>
