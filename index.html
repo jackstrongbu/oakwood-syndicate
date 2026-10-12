@@ -1,0 +1,293 @@
+<!doctype html><html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Oakwood Syndicate</title></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: matchday programme. Floodlit league table up top, picks grid below, owner-only matchday desk at the foot. */
+:root{
+  --bg:#eef1f4; --paper:#ffffff; --ink:#14202e; --muted:#5d6b7a; --rule:#d5dce3; --soft:#f4f6f8;
+  --accent:#1d4ed8; --accent-ink:#ffffff;
+  --board:#0f2a1d; --board-2:#14382a; --board-ink:#eaf6ee; --board-muted:#9cc2ab; --chalk:#f7e26b;
+  --win:#dcefd9; --win-ink:#1f4d22; --best:#5fe04a; --best-ink:#0d2a07;
+  --loss:#f2d6d6; --loss-ink:#5c1f1f; --worst:#e6392b; --worst-ink:#ffffff;
+  --pend:#f6f1dc; --pend-ink:#5a4b12; --up:#2fae4a; --down:#e04a3a;
+  --display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --body:"IBM Plex Sans",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1620; --paper:#17212d; --ink:#e7edf3; --muted:#93a2b2; --rule:#2a3746; --soft:#1d2936;
+  --accent:#7aa2ff; --accent-ink:#0b1220;
+  --board:#0b1f15; --board-2:#123022; --board-ink:#eaf6ee; --board-muted:#8fb79f; --chalk:#f7e26b;
+  --win:#1f3a22; --win-ink:#c9efc4; --best:#3fbf2e; --best-ink:#061503;
+  --loss:#432427; --loss-ink:#f3cfcf; --worst:#d6352a; --worst-ink:#ffffff;
+  --pend:#3a331a; --pend-ink:#f0e2a8; --up:#4fd06a; --down:#ff6b5c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1620; --paper:#17212d; --ink:#e7edf3; --muted:#93a2b2; --rule:#2a3746; --soft:#1d2936;
+  --accent:#7aa2ff; --accent-ink:#0b1220;
+  --board:#0b1f15; --board-2:#123022; --board-ink:#eaf6ee; --board-muted:#8fb79f; --chalk:#f7e26b;
+  --win:#1f3a22; --win-ink:#c9efc4; --best:#3fbf2e; --best-ink:#061503;
+  --loss:#432427; --loss-ink:#f3cfcf; --worst:#d6352a; --worst-ink:#ffffff;
+  --pend:#3a331a; --pend-ink:#f0e2a8; --up:#4fd06a; --down:#ff6b5c; color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:14px}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:24px 56px;display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{font-family:var(--display);font-weight:800;font-size:2.6rem;margin:0;line-height:1;text-wrap:balance}
+h1 span{color:var(--accent)}
+.sub{color:var(--muted);margin:.35rem 0 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--paper);border:1px solid var(--rule);border-radius:999px;padding:4px 12px;font-size:.8rem;color:var(--muted)}
+.chip b{color:var(--ink);font-weight:600}
+h2{font-family:var(--display);font-weight:700;font-size:1.35rem;text-transform:uppercase;letter-spacing:.06em;margin:0}
+.panel{background:var(--paper);border:1px solid var(--rule);border-radius:8px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:10px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+
+/* League board */
+.board{background:linear-gradient(180deg,var(--board-2),var(--board));color:var(--board-ink);border-radius:10px;padding:18px 16px 12px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.board-top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.board h2{color:var(--chalk);font-size:1.6rem}
+.board .meta{color:var(--board-muted);font-size:.8rem}
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,.25);padding:3px;border-radius:999px}
+.tabs button{all:unset;cursor:pointer;font-family:var(--display);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.95rem;padding:5px 14px;border-radius:999px;color:var(--board-muted)}
+.tabs button[aria-pressed="true"]{background:var(--chalk);color:#14202e}
+.tabs button:focus-visible{outline:2px solid var(--chalk);outline-offset:2px}
+.lt{min-width:560px}
+.lt th{font-family:var(--display);font-weight:600;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;color:var(--board-muted);text-align:left;padding:4px 8px;border-bottom:1px solid rgba(255,255,255,.15)}
+.lt th.r,.lt td.r{text-align:right}
+.lt td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.08);vertical-align:middle}
+.lt tr:last-child td{border-bottom:none}
+.pos{font-family:var(--display);font-weight:800;font-size:1.6rem;width:2.6rem;color:var(--board-ink)}
+.lt tr.lead .pos{color:var(--chalk)}
+.mv{font-size:.75rem;font-family:var(--mono);width:2.4rem}
+.mv.up{color:var(--up)} .mv.down{color:var(--down)} .mv.same{color:var(--board-muted)}
+.who{display:flex;align-items:center;gap:10px;min-width:0}
+.badge{flex:none;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:800;font-size:1rem;background:rgba(255,255,255,.1);color:var(--board-ink);border:1px solid rgba(255,255,255,.2)}
+.lt tr.lead .badge{background:var(--chalk);color:#14202e;border-color:var(--chalk)}
+.lt tr.foot .badge{background:var(--worst);color:#fff;border-color:var(--worst)}
+.nm{font-weight:600;white-space:nowrap}
+.nm small{display:block;font-weight:400;color:var(--board-muted);font-size:.72rem}
+.form{display:flex;gap:3px}
+.fc{width:22px;height:22px;border-radius:4px;display:grid;place-items:center;font-family:var(--mono);font-size:.7rem;font-weight:600;background:rgba(255,255,255,.08);color:var(--board-muted)}
+.fc.p2{background:var(--best);color:var(--best-ink)} .fc.p1{background:#cfe9c9;color:#1f4d22}
+.fc.p0{background:rgba(255,255,255,.14);color:var(--board-ink)} .fc.pm{background:var(--worst);color:#fff}
+.pts{font-family:var(--display);font-weight:800;font-size:1.7rem;color:var(--chalk)}
+.num{font-family:var(--mono);font-weight:500}
+svg.spark{display:block}
+.board .note{color:var(--board-muted);font-size:.75rem;margin:0}
+
+/* picks grid */
+.grid th,.grid td{border:1px solid var(--rule);text-align:center;padding:6px 6px;white-space:nowrap}
+.grid thead th{font-family:var(--display);font-weight:700;font-size:1.05rem;letter-spacing:.05em}
+th.rowh{text-align:right;font-family:var(--mono);font-weight:600;color:var(--muted);width:2.5rem}
+td.pick{min-width:4.8rem;font-family:var(--mono);font-weight:500}
+td.pick .t{display:block;font-family:var(--body);font-size:.66rem;letter-spacing:.04em;text-transform:uppercase;opacity:.85;margin-top:1px}
+td.treas{color:var(--muted);font-size:.85rem}
+.win{background:var(--win);color:var(--win-ink)}
+.best{background:var(--best);color:var(--best-ink);font-weight:700}
+.loss{background:var(--loss);color:var(--loss-ink)}
+.worst{background:var(--worst);color:var(--worst-ink);font-weight:700}
+.pend{background:var(--pend);color:var(--pend-ink)}
+.void{color:var(--muted);text-decoration:line-through}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:.78rem;color:var(--muted)}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:5px}
+.how{color:var(--muted);font-size:.82rem;line-height:1.5;margin:0;max-width:70ch}
+.empty{color:var(--muted);padding:24px;text-align:center}
+
+/* desk */
+.desk{border:2px dashed var(--accent)}
+.desk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:860px){.desk-grid{grid-template-columns:1fr}}
+.card{background:var(--soft);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h3{margin:0;font-family:var(--display);font-size:1.15rem;letter-spacing:.04em;text-transform:uppercase}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+label.lbl{font-size:.8rem;color:var(--muted)}
+input[type=text],input[type=number],select{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:6px 8px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;padding:8px 14px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:transparent;color:var(--accent)}
+.btn[disabled]{opacity:.5;cursor:default}
+.drop{border:1.5px dashed var(--rule);border-radius:8px;padding:14px;text-align:center;color:var(--muted);background:var(--paper);cursor:pointer}
+.drop.over{border-color:var(--accent);color:var(--accent)}
+.thumbs{display:flex;gap:6px;flex-wrap:wrap}
+.thumbs img{height:64px;border-radius:4px;border:1px solid var(--rule)}
+.entry{width:100%;border-collapse:collapse}
+.entry td{padding:3px 4px}
+.entry td:first-child{font-family:var(--display);font-weight:700;font-size:1rem;width:2.6rem}
+.entry input[type=text]{width:100%}
+.entry input[type=number]{width:5.2rem}
+.seg{display:inline-flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden}
+.seg button{font:inherit;font-size:.8rem;font-weight:600;border:none;background:var(--paper);color:var(--muted);padding:5px 9px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"][data-r="W"]{background:var(--best);color:var(--best-ink)}
+.seg button[aria-pressed="true"][data-r="L"]{background:var(--worst);color:#fff}
+.seg button[aria-pressed="true"][data-r="V"]{background:var(--muted);color:var(--paper)}
+.status{font-size:.82rem;color:var(--muted);min-height:1.2em}
+.status.err{color:var(--down)}
+.status.ok{color:var(--up)}
+@media (prefers-reduced-motion:no-preference){.lt tbody tr{transition:background .2s}.lt tbody tr:hover{background:rgba(255,255,255,.04)}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>OAKWOOD <span>SYNDICATE</span></h1>
+      <p class="sub">Season <span id="season">2026/27</span> · £1 each, one game each, every week.</p>
+    </div>
+    <div class="chips" id="chips"></div>
+  </header>
+
+  <section class="board" aria-labelledby="lt-h">
+    <div class="board-top">
+      <div>
+        <h2 id="lt-h">League table</h2>
+        <div class="meta" id="lt-meta">Loading…</div>
+      </div>
+      <div class="tabs" role="group" aria-label="Choose league">
+        <button id="tab-points" aria-pressed="true">Points</button>
+        <button id="tab-correct" aria-pressed="false">Correct</button>
+      </div>
+    </div>
+    <div class="scroll"><table class="lt" id="lt"></table></div>
+    <p class="note" id="lt-note"></p>
+  </section>
+
+  <section class="panel">
+    <h2>Picks</h2>
+    <div class="scroll"><table class="grid" id="grid"><tbody><tr><td class="empty">Loading the coupon…</td></tr></tbody></table></div>
+    <div class="legend">
+      <span><i class="win"></i>Won</span><span><i class="best"></i>Longest-odds winner (+2)</span>
+      <span><i class="loss"></i>Lost</span><span><i class="worst"></i>Shortest-odds loser (−1)</span>
+      <span><i class="pend"></i>Awaiting result</span>
+    </div>
+    <p class="how">Each settled week: winner +1, longest-priced winner +2, shortest-priced loser −1, other losers 0. Ties share. Last 5 and Form cover the five most recent settled weeks.</p>
+  </section>
+</div>
+
+<script>
+const DEFAULT_PLAYERS=["CJ","CR","JS","MP","OC","PM","TG","TC","WD"];
+let meta=null, weeks=[], db=null, sample=null, canEdit=false, league="points", files=[];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=n=>n==null||isNaN(n)?"–":n.toFixed(2);
+const players=()=>(meta&&Array.isArray(meta.players)&&meta.players.length)?meta.players:DEFAULT_PLAYERS;
+const fullName=p=>(meta&&meta.names&&meta.names[p])||p;
+const resultOf=(w,p)=>w.picks&&w.picks[p]?w.picks[p].result:null;
+
+function isSettled(w,ps){
+  const active=ps.filter(p=>w.picks&&w.picks[p]);
+  return active.length>0&&active.every(p=>{const r=resultOf(w,p);return r==="V"||((r==="W"||r==="L")&&w.picks[p].odds!=null)});
+}
+function weekPoints(w,ps){
+  const pts={},cls={};
+  const W=ps.filter(p=>resultOf(w,p)==="W"&&w.picks[p].odds!=null);
+  const L=ps.filter(p=>resultOf(w,p)==="L"&&w.picks[p].odds!=null);
+  const maxW=W.length?Math.max(...W.map(p=>+w.picks[p].odds)):null;
+  const minL=L.length?Math.min(...L.map(p=>+w.picks[p].odds)):null;
+  const settled=isSettled(w,ps);
+  ps.forEach(p=>{
+    const r=resultOf(w,p);
+    if(r==="W"){const b=settled&&+w.picks[p].odds===maxW;cls[p]=b?"best":"win";pts[p]=settled?(b?2:1):null}
+    else if(r==="L"){const x=settled&&+w.picks[p].odds===minL;cls[p]=x?"worst":"loss";pts[p]=settled?(x?-1:0):null}
+    else if(r==="V"){cls[p]="void";pts[p]=settled?0:null}
+    else if(w.picks&&w.picks[p]){cls[p]="pend";pts[p]=null}
+    else{cls[p]="";pts[p]=null}
+  });
+  return{pts,cls,settled};
+}
+function rankLabels(ps,keyFn){
+  const keys=Object.fromEntries(ps.map(p=>[p,keyFn(p)]));
+  const cmp=(a,b)=>{for(let i=0;i<a.length;i++){const x=a[i]??-1e9,y=b[i]??-1e9;if(Math.abs(x-y)>1e-9)return y-x}return 0};
+  const out={};
+  ps.forEach(p=>{const better=ps.filter(q=>cmp(keys[q],keys[p])<0).length;const tied=ps.filter(q=>q!==p&&cmp(keys[q],keys[p])===0).length;out[p]={n:better+1,label:(tied?"T":"")+(better+1)}});
+  return out;
+}
+function standings(ps,computed,uptoN){
+  const cw=computed.filter(c=>c.w.n<=uptoN), settled=cw.filter(c=>c.settled);
+  const st={};
+  ps.forEach(p=>{
+    const wins=[],all=[];
+    cw.forEach(({w})=>{const pk=w.picks&&w.picks[p];if(!pk||pk.odds==null)return;if(pk.result==="W"){wins.push(+pk.odds);all.push(+pk.odds)}else if(pk.result==="L")all.push(+pk.odds)});
+    const avg=a=>a.length?a.reduce((s,x)=>s+x,0)/a.length:null;
+    let run=0;const cum=settled.map(c=>run+=(c.pts[p]||0));
+    st[p]={correct:wins.length,cAvg:avg(wins),oAvg:avg(all),score:run,last5:settled.slice(-5).reduce((s,c)=>s+(c.pts[p]||0),0),
+      form:settled.slice(-5).map(c=>c.pts[p]),cum,returns:wins.reduce((s,x)=>s+x,0)};
+  });
+  return{st,rankS:rankLabels(ps,p=>[st[p].score]),rankC:rankLabels(ps,p=>[st[p].correct,st[p].cAvg]),rankF:rankLabels(ps,p=>[st[p].last5]),settled};
+}
+function spark(cum,lo,hi){
+  const w=90,h=26;if(cum.length<2)return"";
+  const xs=i=>(i/(cum.length-1))*(w-4)+2, ys=v=>h-3-((v-lo)/((hi-lo)||1))*(h-6);
+  const d=cum.map((v,i)=>(i?"L":"M")+xs(i).toFixed(1)+" "+ys(v).toFixed(1)).join(" ");
+  const last=cum.length-1;
+  return `<svg class="spark" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" aria-hidden="true"><line x1="2" x2="${w-2}" y1="${ys(0).toFixed(1)}" y2="${ys(0).toFixed(1)}" stroke="rgba(255,255,255,.18)" stroke-dasharray="2 3"/><path d="${d}" fill="none" stroke="var(--board-ink)" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="${xs(last)}" cy="${ys(cum[last])}" r="2.8" fill="var(--chalk)"/></svg>`;
+}
+
+function render(){
+  const ps=players();
+  $("season").textContent=meta&&meta.season||"2026/27";
+  const sorted=[...weeks].sort((a,b)=>(a.n||0)-(b.n||0));
+  const computed=sorted.map(w=>({w,...weekPoints(w,ps)}));
+  const settledC=computed.filter(c=>c.settled);
+  const kitty=sorted.reduce((s,w)=>s+ps.filter(p=>w.picks&&w.picks[p]).length*(meta&&meta.stake||1),0);
+  $("chips").innerHTML=`<span class="chip">Weeks settled <b>${settledC.length}</b></span><span class="chip">Staked so far <b>£${kitty}</b></span>`+(meta&&meta.treasurer?`<span class="chip">Treasurer <b>${esc(meta.treasurer)}</b></span>`:"");
+  renderDesk(sorted,ps);
+  if(!sorted.length){
+    $("grid").innerHTML=`<tbody><tr><td class="empty">No weeks yet.</td></tr></tbody>`;
+    $("lt").innerHTML="";$("lt-meta").textContent="No settled weeks yet";return;
+  }
+  const lastN=settledC.length?settledC[settledC.length-1].w.n:0;
+  const prevN=settledC.length>1?settledC[settledC.length-2].w.n:null;
+  const now=standings(ps,computed,Infinity);
+  const prev=prevN!=null?standings(ps,computed,prevN):null;
+  renderLeague(ps,now,prev,lastN);
+  renderGrid(ps,computed);
+}
+
+function renderLeague(ps,now,prev,lastN){
+  const {st}=now, isP=league==="points";
+  const rank=isP?now.rankS:now.rankC, prank=prev?(isP?prev.rankS:prev.rankC):null;
+  const order=[...ps].sort((a,b)=>rank[a].n-rank[b].n||a.localeCompare(b));
+  const all=ps.flatMap(p=>st[p].cum.concat([0])), lo=Math.min(...all), hi=Math.max(...all);
+  $("lt-meta").textContent=lastN?`After week ${lastN}`+(prev?" · arrows show movement since last week":""):"No settled weeks yet";
+  let h=isP
+    ?`<thead><tr><th>Pos</th><th></th><th>Player</th><th>Last 5</th><th>Season</th><th class="r">L5</th><th class="r">Pts</th></tr></thead><tbody>`
+    :`<thead><tr><th>Pos</th><th></th><th>Player</th><th class="r">Correct</th><th class="r">Correct avg</th><th class="r">Overall avg</th><th class="r">£ returned</th></tr></thead><tbody>`;
+  order.forEach((p,i)=>{
+    const r=rank[p];let mv=`<td class="mv same">–</td>`;
+    if(prank){const d=prank[p].n-r.n;mv=d>0?`<td class="mv up">▲${d}</td>`:d<0?`<td class="mv down">▼${-d}</td>`:`<td class="mv same">●</td>`}
+    const cls=r.n===1?"lead":(i===order.length-1&&rank[order[0]].n!==r.n)?"foot":"";
+    const who=`<td><div class="who"><span class="badge">${esc(p)}</span><span class="nm">${esc(fullName(p))}${fullName(p)!==p?`<small>${esc(p)}</small>`:""}</span></div></td>`;
+    if(isP){
+      const form=Array.from({length:5},(_,k)=>{const v=st[p].form[st[p].form.length-5+k];if(v===undefined)return`<span class="fc"></span>`;const c=v===2?"p2":v===1?"p1":v===-1?"pm":"p0";return`<span class="fc ${c}">${v>0?"+"+v:v===-1?"−1":"0"}</span>`}).join("");
+      h+=`<tr class="${cls}"><td class="pos">${r.label}</td>${mv}${who}<td><div class="form">${form}</div></td><td>${spark(st[p].cum,lo,hi)}</td><td class="r num">${st[p].last5}</td><td class="r pts">${st[p].score}</td></tr>`;
+    }else{
+      h+=`<tr class="${cls}"><td class="pos">${r.label}</td>${mv}${who}<td class="r pts">${st[p].correct}</td><td class="r num">${fmt(st[p].cAvg)}</td><td class="r num">${fmt(st[p].oAvg)}</td><td class="r num">£${st[p].returns.toFixed(2)}</td></tr>`;
+    }
+  });
+  $("lt").innerHTML=h+"</tbody>";
+  $("lt-note").textContent=isP?"Players level on points share a position. Form chips run oldest to newest.":"Ranked by winners picked, ties split by average odds of those winners. £ returned is what each person's £1 bets would have paid back as singles.";
+}
+
+function renderGrid(ps,computed){
+  let h=`<thead><tr><th>${esc(meta&&meta.season||"2026/27")}</th>${ps.map(p=>`<th>${esc(p)}</th>`).join("")}<th>Treasurer</th></tr></thead><tbody>`;
+  computed.forEach(({w,cls})=>{
+    h+=`<tr><th class="rowh">${w.n}</th>`;
+    ps.forEach(p=>{const pk=w.picks&&w.picks[p];if(!pk){h+=`<td></td>`;return}
+      const odds=pk.odds!=null?String(+pk.odds):"";
+      h+=odds?`<td class="pick ${cls[p]}">${odds}${pk.team?`<span class="t">${esc(pk.team)}</span>`:""}</td>`:`<td class="pick ${cls[p]}"><span class="t" style="font-size:.8rem">${esc(pk.team||"–")}</span></td>`});
+    h+=`<td class="treas">${esc(w.treasurer||(meta&&meta.treasurer)||"")}</td></tr>`;
+  });
+  $("grid").innerHTML=h+"</tbody>";
+}
+
+function renderDesk(){}
+/* league tabs */
+[["tab-points","points"],["tab-correct","correct"]].forEach(([id,v])=>$(id).addEventListener("click",()=>{
+  league=v;$("tab-points").setAttribute("aria-pressed",v==="points");$("tab-correct").setAttribute("aria-pressed",v==="correct");
+  try{localStorage.setItem("league",v)}catch(e){}render()}));
+try{const s=localStorage.getItem("league");if(s==="correct"){league=s;$("tab-points").setAttribute("aria-pressed","false");$("tab-correct").setAttribute("aria-pressed","true")}}catch(e){}
+
+const DATA={"meta":{"name":"Oakwood Syndicate","names":{"CJ":"Charlie Johnson","CR":"Tighty Tufnell","JS":"Jack Strong","MP":"Matt Patey","OC":"Oliver Cole","PM":"Paul Monan","TC":"Tom Cronk","TG":"Thomas Gillespie","WD":"Will Dolton"},"players":["CJ","CR","JS","MP","OC","PM","TG","TC","WD"],"season":"2026/27","stake":1,"treasurer":"Cronk","updated":"12 Oct 2026","uploader":"JS"},"weeks":[{"n":1,"picks":{"CJ":{"odds":1.67,"result":"L"},"CR":{"odds":1.91,"result":"W"},"JS":{"odds":2.45,"result":"L"},"MP":{"odds":2.4,"result":"L"},"OC":{"odds":2.15,"result":"L"},"PM":{"odds":1.67,"result":"W"},"TC":{"odds":2.25,"result":"W"},"TG":{"odds":1.91,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":2,"picks":{"CJ":{"odds":2.63,"result":"W"},"CR":{"odds":2.9,"result":"W"},"JS":{"odds":2.1,"result":"L"},"MP":{"odds":2.25,"result":"W"},"OC":{"odds":2.7,"result":"L"},"PM":{"odds":1.91,"result":"L"},"TC":{"odds":1.73,"result":"L"},"TG":{"odds":2,"result":"L"},"WD":{"odds":2.25,"result":"W"}},"treasurer":"Cronk"},{"n":3,"picks":{"CJ":{"odds":1.95,"result":"L"},"CR":{"odds":1.57,"result":"W"},"JS":{"odds":1.87,"result":"L"},"MP":{"odds":2.5,"result":"L"},"OC":{"odds":1.91,"result":"W"},"PM":{"odds":2.5,"result":"L"},"TC":{"odds":2.2,"result":"L"},"TG":{"odds":3.6,"result":"W"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":4,"picks":{"CJ":{"odds":3.6,"result":"L"},"CR":{"odds":1.67,"result":"W"},"JS":{"odds":2,"result":"W"},"MP":{"odds":1.8,"result":"W"},"OC":{"odds":1.8,"result":"L"},"PM":{"odds":2.05,"result":"W"},"TC":{"odds":3.5,"result":"W"},"TG":{"odds":3.1,"result":"L"},"WD":{"odds":2.15,"result":"W"}},"treasurer":"Cronk"},{"n":5,"picks":{"CJ":{"odds":1.57,"result":"W"},"CR":{"odds":1.95,"result":"L"},"JS":{"odds":1.53,"result":"W"},"MP":{"odds":1.87,"result":"W"},"OC":{"odds":1.9,"result":"L"},"PM":{"odds":1.8,"result":"W"},"TC":{"odds":2.1,"result":"W"},"TG":{"odds":2.9,"result":"L"},"WD":{"odds":2.4,"result":"W"}},"treasurer":"Cronk"},{"n":6,"picks":{"CJ":{"odds":2.4,"result":"L"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.62,"result":"L"},"MP":{"odds":2.63,"result":"L"},"OC":{"odds":2,"result":"L"},"PM":{"odds":2.1,"result":"L"},"TC":{"odds":1.7,"result":"L"},"TG":{"odds":2.05,"result":"L"},"WD":{"odds":2.45,"result":"W"}},"treasurer":"Cronk"},{"n":7,"picks":{"CJ":{"odds":2,"result":"W"},"CR":{"odds":2,"result":"L"},"JS":{"odds":1.83,"result":"W"},"MP":{"odds":1.67,"result":"L"},"OC":{"odds":2.63,"result":"L"},"PM":{"odds":3.25,"result":"W"},"TC":{"odds":2.38,"result":"L"},"TG":{"odds":2.63,"result":"L"},"WD":{"odds":2.8,"result":"W"}},"treasurer":"Cronk"},{"date":"19 Sep 2026","n":8,"picks":{"CJ":{"odds":1.8,"result":"L","team":"BURNLEY"},"CR":{"odds":2.4,"result":"L","team":"SAINTS"},"JS":{"odds":2.8,"result":"L","team":"WEDS"},"MP":{"odds":2,"result":"L","team":"OXFORD"},"OC":{"odds":2.4,"result":"L","team":"ST MIRREN"},"PM":{"odds":1.75,"result":"W","team":"EVERTON"},"TC":{"odds":1.62,"result":"L","team":"CLYDE"},"TG":{"odds":1.73,"result":"L","team":"QPR"},"WD":{"odds":2.75,"result":"L","team":"KIDDY"}},"treasurer":"Cronk"},{"date":"10 Oct 2026","n":9,"picks":{"CJ":{"odds":2.3,"result":"L","team":"WREXHAM"},"CR":{"odds":2.15,"result":"L","team":"DUNFERMLINE"},"JS":{"odds":1.8,"result":"W","team":"HAMILTON"},"MP":{"odds":1.67,"result":"W","team":"SOUTHEND"},"OC":{"odds":2,"result":"W","team":"STEVENAGE"},"PM":{"odds":2.3,"result":"L","team":"CARDIFF"},"TC":{"odds":1.44,"result":"W","team":"HEARTS"},"TG":{"odds":1.87,"result":"L","team":"FALKIRK"},"WD":{"odds":2.1,"result":"W","team":"HARROGATE"}},"treasurer":"Cronk"}]};
+meta=DATA.meta;weeks=DATA.weeks;render();
+</script>
+</body></html>
