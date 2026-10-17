@@ -4,10 +4,11 @@ Weekly £1 football picks: league table and picks grid. `index.html` is the main
 
 ## Extras (public site only)
 - **Live scores** (`extras.js` + `netlify/functions/scores.mjs`): matches each pick in the latest week to a live fixture and refreshes every minute while games are on. Free source is ESPN's scoreboard feed (Premier League to League Two, Scottish Prem and Championship, cups). For National League and Scottish League One/Two, add an `API_FOOTBALL_KEY` environment variable in Netlify (api-football.com; the free plan may not include the current season).
-- **Send screenshots** (`extras.js` + `netlify/functions/upload.mjs`): anyone with the link can upload picks or bet slip screenshots. They're stored privately in Netlify Blobs, never in this repo.
-- **Inbox** (`/inbox.html` + `netlify/functions/inbox.mjs`): Jack's private view of uploads, opened with the inbox key.
+- **Add this week's games** (`extras.js` + `netlify/edge-functions/read-slip.js` + `netlify/functions/weeks.mjs`): anyone uploads the Sky Bet slip (plus WhatsApp picks if they like), Claude reads every selection and its odds, they check it and publish. The week goes live on the site immediately (stored in Netlify Blobs, merged into the page on load). Reading needs `ANTHROPIC_API_KEY` in Netlify; without it the table is filled in by hand.
+- Site-added weeks are replaced by the tracker's copy as soon as that week exists in `DATA` (i.e. after Jack's results update). Previous versions are kept under `history/` in the weeks store.
+- **Inbox** (`/inbox.html` + `netlify/functions/inbox.mjs`): private copy of every uploaded slip, opened with the inbox key.
 
-Optional Netlify environment variables: `UPLOAD_CODE` (require a code to upload), `INBOX_KEY` (extra inbox key), `REFRESH_SECONDS` (live refresh rate).
+Optional Netlify environment variables: `ANTHROPIC_API_KEY` (automatic slip reading), `UPLOAD_CODE` (require a code to publish), `INBOX_KEY` (extra inbox key), `REFRESH_SECONDS` (live refresh rate).
 
 ## Rebuilding index.html
 Keep `<script src="extras.js" defer></script>` just before `</body>` and keep the data in a top-level `const DATA=...`, so the extras still load.

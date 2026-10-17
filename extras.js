@@ -52,22 +52,30 @@
   .seg2 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
   .seg2 button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .lv-foot{color:var(--muted);font-size:.76rem;margin:0}
-  .up-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-  @media (max-width:760px){.up-grid{grid-template-columns:1fr}}
-  .up-form{display:flex;flex-direction:column;gap:10px}
-  .up-form label{font-size:.8rem;color:var(--muted)}
-  .up-form select,.up-form input[type=text]{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px;width:100%;box-sizing:border-box}
+  .add-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px}
+  @media (max-width:820px){.add-grid{grid-template-columns:1fr}}
+  .add-col{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .add-col label,.lab2{font-size:.78rem;color:var(--muted)}
+  .add-col select,.add-col input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:7px 8px;min-width:0;box-sizing:border-box}
   .up-drop{border:1.5px dashed var(--rule);border-radius:8px;padding:18px;text-align:center;color:var(--muted);background:var(--soft);cursor:pointer}
   .up-drop.over{border-color:var(--accent);color:var(--accent)}
   .up-thumbs{display:flex;flex-wrap:wrap;gap:6px}
-  .up-thumbs img{height:72px;border-radius:4px;border:1px solid var(--rule)}
+  .up-thumbs img{max-height:260px;max-width:100%;border-radius:6px;border:1px solid var(--rule);cursor:zoom-in}
+  .up-thumbs.big img{max-height:none}
   .up-btn{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;padding:10px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);align-self:flex-start}
+  .up-btn.ghost{background:transparent;color:var(--accent)}
   .up-btn[disabled]{opacity:.5;cursor:default}
   .up-status{font-size:.85rem;min-height:1.2em;color:var(--muted)}
   .up-status.ok{color:var(--up)}.up-status.err{color:var(--down)}
-  .rcv{display:flex;flex-wrap:wrap;gap:6px}
-  .rcv span{font-family:var(--display);font-weight:700;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;border:1px solid var(--rule);color:var(--muted)}
-  .rcv span.y{background:var(--best);color:var(--best-ink);border-color:transparent}
+  .wk-row{display:flex;gap:8px;flex-wrap:wrap}
+  .wk-row>div{display:flex;flex-direction:column;gap:3px}
+  .sel{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 4.6rem 1.8rem;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rule)}
+  .sel input,.sel select{width:100%}
+  .sel .mt2{grid-column:2/4}
+  .sel .x{all:unset;cursor:pointer;color:var(--muted);text-align:center;font-size:1.1rem}
+  .sel.dupe select{border-color:var(--down)}
+  .sel-head{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 4.6rem 1.8rem;gap:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .tagsite{display:inline-block;font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--pend);color:var(--pend-ink)}
   `;
   document.head.insertAdjacentHTML("beforeend", `<style>${css}</style>`);
 
@@ -76,7 +84,7 @@
   const header = wrap && wrap.querySelector("header");
   if (!wrap || !header) return;
   header.querySelector(".hdr-r")?.insertAdjacentHTML("afterbegin",
-    `<nav class="xnav" aria-label="Sections"><a href="#live" id="nav-live"><span class="dot"></span>Live scores</a><a href="#send">Send screenshots</a></nav>`);
+    `<nav class="xnav" aria-label="Sections"><a href="#live" id="nav-live"><span class="dot"></span>Live scores</a><a href="#add">Add this week</a></nav>`);
   header.insertAdjacentHTML("afterend", `
   <section class="panel" id="live" aria-labelledby="lv-title">
     <div class="lv-top">
@@ -92,25 +100,29 @@
   </section>`);
   const lastPanel = [...wrap.querySelectorAll(":scope > section.panel")].pop();
   (lastPanel || wrap.lastElementChild).insertAdjacentHTML("afterend", `
-  <section class="panel" id="send" aria-labelledby="up-title">
-    <h2 id="up-title">Send screenshots</h2>
-    <p class="how">Got the WhatsApp picks or the Sky Bet slip? Drop the screenshots here and they go straight to Jack's inbox to be added to the tracker. They're private, nobody else sees them.</p>
-    <div class="up-grid">
-      <form class="up-form" id="up-form">
-        <div><label for="up-who">Who's sending?</label>
-          <select id="up-who"><option value="">Choose your name</option>${players.map(p => `<option value="${esc(p)}">${esc(full(p))}</option>`).join("")}<option value="Other">Someone else</option></select></div>
+  <section class="panel" id="add" aria-labelledby="add-title">
+    <h2 id="add-title">Add this week's games</h2>
+    <p class="how">Upload the Sky Bet slip (add the WhatsApp picks screenshot too if you want names filled in). The games are read off it, you check them, hit Publish and they're on the site straight away with live scores.</p>
+    <div class="add-grid">
+      <div class="add-col">
+        <div><label for="add-by">Who's adding?</label><br><select id="add-by"><option value="">Choose your name</option>${players.map(p => `<option value="${esc(p)}">${esc(full(p))}</option>`).join("")}</select></div>
         <div class="up-drop" id="up-drop" tabindex="0" role="button">Tap to choose screenshots, or drop them here</div>
         <input type="file" id="up-file" accept="image/*" multiple hidden>
+        <div class="up-status" id="read-status" role="status"></div>
         <div class="up-thumbs" id="up-thumbs"></div>
-        <div><label for="up-note">Note (optional)</label><input type="text" id="up-note" maxlength="280" placeholder="e.g. week 10 slip, or my pick changed"></div>
-        <div id="up-code-row" hidden><label for="up-code">Syndicate code</label><input type="text" id="up-code" autocomplete="off"></div>
-        <button class="up-btn" id="up-send" type="submit" disabled>Send</button>
-        <div class="up-status" id="up-status" role="status"></div>
-      </form>
-      <div class="card" style="background:var(--soft);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px">
-        <h3 style="margin:0;font-family:var(--display);text-transform:uppercase;letter-spacing:.04em">Received this week</h3>
-        <div class="rcv" id="rcv">${players.map(p => `<span data-p="${esc(p)}" title="${esc(full(p))}">${esc(p)}</span>`).join("")}</div>
-        <p class="how" id="rcv-note">Green means something's arrived from them in the last 7 days.</p>
+      </div>
+      <div class="add-col">
+        <div class="wk-row">
+          <div><label for="add-n">Week</label><input type="number" id="add-n" min="1" max="60" style="width:5rem"></div>
+          <div><label for="add-date">Date</label><input type="text" id="add-date" style="width:8.5rem" placeholder="17 Oct 2026"></div>
+          <div><label for="add-acca">Acca odds</label><input type="number" id="add-acca" step="0.01" min="1" style="width:7rem" placeholder="optional"></div>
+        </div>
+        <div class="sel-head"><span>Player</span><span>Team backed / match</span><span>Odds</span><span></span></div>
+        <div id="sels"></div>
+        <button class="up-btn ghost" id="add-row" type="button">Add a game</button>
+        <div id="code-row" hidden><label for="add-code">Syndicate code</label><br><input type="text" id="add-code" autocomplete="off"></div>
+        <button class="up-btn" id="publish" type="button">Publish to the site</button>
+        <div class="up-status" id="pub-status" role="status"></div>
       </div>
     </div>
   </section>`);
@@ -168,17 +180,23 @@
   }
 
   /* ---------- live scores ---------- */
-  const weeks = [...(D.weeks || [])].sort((a, b) => (a.n || 0) - (b.n || 0));
-  const wk = weeks[weeks.length - 1];
+  let reloadLive = () => {};
+  function initLive() {
   const parseDate = s => { const d = s ? new Date(s + " 12:00") : null; return d && !isNaN(d) ? d : null; };
-  const wkDate = wk && parseDate(wk.date);
-  const today = new Date(); today.setHours(12, 0, 0, 0);
   const stamp = d => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
   const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
-  const wkCurrent = wkDate && (today - wkDate) / 864e5 <= 3;
-  // Picks week: the Friday before to the Tuesday after the slip date. Otherwise just today's games.
-  const from = stamp(wkCurrent ? addDays(wkDate, -1) : today);
-  const to = stamp(wkCurrent ? addDays(wkDate, 3) : today);
+  let wk, wkDate, wkCurrent, from, to;
+  function computeWeek() {
+    const lvWeeks = [...(D.weeks || [])].sort((a, b) => (a.n || 0) - (b.n || 0));
+    wk = lvWeeks[lvWeeks.length - 1];
+    wkDate = wk && parseDate(wk.date);
+    const today = new Date(); today.setHours(12, 0, 0, 0);
+    wkCurrent = wkDate && (today - wkDate) / 864e5 <= 3;
+    // Picks week: the day before to three days after the slip date. Otherwise just today's games.
+    from = stamp(wkCurrent ? addDays(wkDate, -1) : today);
+    to = stamp(wkCurrent ? addDays(wkDate, 3) : today);
+  }
+  computeWeek();
   let view = "ours", feed = null, timer = null, failCount = 0;
 
   const ko = iso => new Date(iso).toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/London" });
@@ -212,7 +230,7 @@
     const rows = ourMatches(fixtures);
     const tally = { ahead: 0, level: 0, behind: 0 }; let dead = false, settled = 0;
     rows.forEach(r => { if (r.st) tally[r.st]++; if (r.f && r.f.state === "post") { settled++; if (r.st !== "ahead") dead = true; } if (r.pk.result === "L") dead = true; });
-    $("lv-meta").textContent = `Week ${wk.n}${wk.date ? " · " + wk.date : ""}${wkCurrent ? "" : " · new picks not in yet, showing the last week"}${upd ? " · updated " + upd : ""}`;
+    $("lv-meta").textContent = `Week ${wk.n}${wk.date ? " · " + wk.date : ""}${wk.source === "site" && wk.by ? " · added by " + full(wk.by) : ""}${wkCurrent ? "" : " · new picks not in yet, showing the last week"}${upd ? " · updated " + upd : ""}`;
     const live = rows.filter(r => r.f && r.f.state === "in").length;
     $("lv-sum").innerHTML = feed ? `<span class="chip">Winning <b>${tally.ahead}</b></span><span class="chip">Drawing <b>${tally.level}</b></span><span class="chip">Losing <b>${tally.behind}</b></span><span class="chip">Live now <b>${live}</b></span><span class="chip">9-fold <b>${dead ? "Dead" : tally.ahead === rows.length && settled === rows.length ? "Landed!" : "Still alive"}</b></span>` : "";
     const ordered = rows.slice().sort((a, b) => rank(a) - rank(b) || (a.f ? new Date(a.f.kickoff) : 0) - (b.f ? new Date(b.f.kickoff) : 0));
@@ -262,19 +280,87 @@
   const setView = v => { view = v; $("lv-ours").setAttribute("aria-pressed", v === "ours"); $("lv-every").setAttribute("aria-pressed", v === "every"); render(); };
   $("lv-ours").addEventListener("click", () => setView("ours"));
   $("lv-every").addEventListener("click", () => setView("every"));
+  reloadLive = () => { computeWeek(); render(); load(); };
   render(); load();
+  }
 
-  /* ---------- uploads ---------- */
-  let shots = [];
-  const status = (t, c) => { const s = $("up-status"); s.textContent = t; s.className = "up-status" + (c ? " " + c : ""); };
-  const ready = () => { $("up-send").disabled = !shots.length || !$("up-who").value; };
-  try { const w = localStorage.getItem("oak-who"); if (w) $("up-who").value = w; } catch { }
-  $("up-who").addEventListener("change", () => { try { localStorage.setItem("oak-who", $("up-who").value); } catch { } ready(); });
-  function addFiles(list) {
-    [...list].filter(f => /^image\//.test(f.type)).slice(0, 8 - shots.length).forEach(f => shots.push(f));
-    $("up-thumbs").innerHTML = shots.map(f => `<img alt="" src="${URL.createObjectURL(f)}">`).join("");
-    status(shots.length ? `${shots.length} screenshot${shots.length > 1 ? "s" : ""} ready` : "");
-    ready();
+  /* ---------- add this week's games ---------- */
+  let shots = [], fromSite = new Set();
+  const st = (id, t, c) => { const s = $(id); s.textContent = t; s.className = "up-status" + (c ? " " + c : ""); };
+  const allWeeks = () => [...(D.weeks || [])].sort((a, b) => a.n - b.n);
+  const fmtDate = d => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+  const playerOpts = sel => `<option value="">Who?</option>${players.map(p => `<option value="${esc(p)}"${p === sel ? " selected" : ""}>${esc(p)}</option>`).join("")}`;
+  function addRow(x = {}) {
+    const d = document.createElement("div"); d.className = "sel";
+    d.innerHTML = `<select aria-label="Player">${playerOpts(x.player)}</select><input aria-label="Team backed" placeholder="Team" value="${esc(x.team || "")}"><input aria-label="Odds" type="number" step="0.01" min="1.01" placeholder="2.10" value="${x.odds != null ? esc(x.odds) : ""}"><button class="x" type="button" aria-label="Remove game">×</button><span></span><input class="mt2" aria-label="Match" placeholder="Home v Away" value="${esc(x.match || "")}">`;
+    d.querySelector(".x").addEventListener("click", () => { d.remove(); checkDupes(); });
+    d.querySelector("select").addEventListener("change", checkDupes);
+    $("sels").appendChild(d);
+  }
+  function checkDupes() {
+    const rows = [...document.querySelectorAll("#sels .sel")], seen = {};
+    rows.forEach(r => { const v = r.querySelector("select").value; if (v) seen[v] = (seen[v] || 0) + 1; });
+    rows.forEach(r => r.classList.toggle("dupe", (seen[r.querySelector("select").value] || 0) > 1));
+  }
+  function guessPlayer(team, taken) {
+    // Same team as someone's pick last week? Probably theirs again.
+    const last = allWeeks().slice(-3).reverse();
+    for (const w of last) for (const p of players) {
+      const pk = w.picks && w.picks[p];
+      if (pk && pk.team && !taken.has(p) && sim(pk.team, team) >= .99) return p;
+    }
+    return "";
+  }
+  function resetForm() {
+    const ws = allWeeks(), last = ws[ws.length - 1];
+    const nextN = last ? (last.picks && Object.values(last.picks).some(pk => pk.result == null) && fromSite.has(last.n) ? last.n : last.n + 1) : 1;
+    $("add-n").value = nextN; $("add-date").value = fmtDate(new Date()); $("add-acca").value = "";
+    $("sels").innerHTML = "";
+    const cur = fromSite.has(nextN) && ws.find(w => w.n === nextN);
+    if (cur) {
+      // This week was added from the site and isn't settled: show it so anyone can correct it.
+      if (cur.date) $("add-date").value = cur.date;
+      if (cur.acca && cur.acca.odds) $("add-acca").value = cur.acca.odds;
+      players.forEach(p => cur.picks[p] && addRow({ ...cur.picks[p], player: p }));
+      st("read-status", `Week ${nextN} is already up. Change anything below and publish again to correct it.`);
+    }
+    for (let i = $("sels").children.length; i < players.length; i++) addRow();
+  }
+  function fillFrom(data) {
+    const sels = data.selections || [];
+    if (data.date) $("add-date").value = data.date;
+    if (data.acca && data.acca.odds) $("add-acca").value = data.acca.odds;
+    $("sels").innerHTML = "";
+    const taken = new Set(sels.map(x => x.player).filter(p => players.includes(p)));
+    sels.forEach(x => { let p = players.includes(x.player) ? x.player : guessPlayer(x.team, taken); if (p) taken.add(p); addRow({ ...x, player: p }); });
+    for (let i = sels.length; i < players.length; i++) addRow();
+    checkDupes();
+  }
+  async function shrink(file) {
+    const bmp = await createImageBitmap(file).catch(() => null);
+    if (!bmp) return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
+    const k = Math.min(1, 1800 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+    return c.toDataURL("image/jpeg", 0.85);
+  }
+  async function addFiles(list) {
+    const fresh = [...list].filter(f => /^image\//.test(f.type)).slice(0, 4);
+    if (!fresh.length) return;
+    shots = await Promise.all(fresh.map(shrink));
+    $("up-thumbs").innerHTML = shots.map(u => `<img alt="Uploaded screenshot" src="${u}">`).join("");
+    st("read-status", "Reading the games off the screenshot…");
+    try {
+      const lastWeek = {}; const lw = allWeeks().slice(-1)[0];
+      if (lw && lw.picks) players.forEach(p => { if (lw.picks[p]) lastWeek[p] = lw.picks[p].team; });
+      const r = await fetch("/api/read-slip", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: shots, players: Object.fromEntries(players.map(p => [p, full(p)])), lastWeek }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.message || "Couldn't read it automatically, fill the table in from the screenshot.");
+      fillFrom(j);
+      const n = (j.selections || []).length, named = (j.selections || []).filter(x => x.player).length;
+      st("read-status", `Found ${n} game${n === 1 ? "" : "s"}. Check the odds and who picked what, then publish.`, "ok");
+    } catch (e) { st("read-status", e.message, "err"); }
   }
   const drop = $("up-drop");
   drop.addEventListener("click", () => $("up-file").click());
@@ -283,42 +369,73 @@
   drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
   drop.addEventListener("dragleave", () => drop.classList.remove("over"));
   drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); });
-  document.addEventListener("paste", e => { if (e.clipboardData && e.clipboardData.files.length) addFiles(e.clipboardData.files); });
+  document.addEventListener("paste", e => { if (e.clipboardData && e.clipboardData.files.length && !e.target.closest("input")) addFiles(e.clipboardData.files); });
+  $("up-thumbs").addEventListener("click", () => $("up-thumbs").classList.toggle("big"));
+  $("add-row").addEventListener("click", () => addRow());
+  try { const w = localStorage.getItem("oak-who"); if (w) $("add-by").value = w; } catch { }
+  $("add-by").addEventListener("change", () => { try { localStorage.setItem("oak-who", $("add-by").value); } catch { } });
 
-  async function shrink(file) {
-    const bmp = await createImageBitmap(file).catch(() => null);
-    if (!bmp) return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
-    const max = 1800, k = Math.min(1, max / Math.max(bmp.width, bmp.height));
-    const c = document.createElement("canvas"); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
-    c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
-    return c.toDataURL("image/jpeg", 0.85);
-  }
-  $("up-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    if (!shots.length || !$("up-who").value) return;
-    $("up-send").disabled = true;
-    let sent = 0;
-    for (const f of shots) {
-      status(`Sending ${sent + 1} of ${shots.length}…`);
-      try {
-        const r = await fetch("/api/upload", { method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ who: $("up-who").value, note: $("up-note").value, code: $("up-code").value, image: await shrink(f) }) });
-        const j = await r.json().catch(() => ({}));
-        if (r.status === 403) { $("up-code-row").hidden = false; status(j.error || "Enter the syndicate code", "err"); ready(); return; }
-        if (!r.ok) throw new Error(j.error || "Upload failed");
-        sent++;
-      } catch (err) { status(`${err.message}. ${sent} of ${shots.length} sent.`, "err"); ready(); return; }
-    }
-    shots = []; $("up-thumbs").innerHTML = ""; $("up-note").value = ""; $("up-file").value = "";
-    status(`Sent ${sent} screenshot${sent > 1 ? "s" : ""}. Cheers!`, "ok");
-    loadReceived();
-  });
-  async function loadReceived() {
+  $("publish").addEventListener("click", async () => {
+    const n = Number($("add-n").value), by = $("add-by").value;
+    if (!by) return st("pub-status", "Choose your name first", "err");
+    if (!Number.isInteger(n) || n < 1) return st("pub-status", "Week number looks wrong", "err");
+    const existing = allWeeks().find(w => w.n === n);
+    if (existing && !fromSite.has(n)) return st("pub-status", `Week ${n} is already on the table. Use week ${allWeeks().slice(-1)[0].n + 1}.`, "err");
+    const picks = {}; let problem = "";
+    document.querySelectorAll("#sels .sel").forEach(r => {
+      const [sel, team, odds, , , match] = r.children;
+      const t = team.value.trim(), o = Number(odds.value), p = sel.value;
+      if (!t && !p && !odds.value) return;
+      if (!p) problem = problem || `Who picked ${t || "that game"}?`;
+      else if (picks[p]) problem = problem || `${full(p)} is down twice`;
+      else if (!t) problem = problem || `What team did ${full(p)} pick?`;
+      else if (!(o >= 1.01)) problem = problem || `Odds for ${t} look wrong`;
+      else picks[p] = { team: t.toUpperCase(), match: match.value.trim(), odds: o };
+    });
+    if (problem) return st("pub-status", problem, "err");
+    const count = Object.keys(picks).length;
+    if (!count) return st("pub-status", "No games to publish yet", "err");
+    if (count < players.length && !confirm(`Only ${count} of ${players.length} picks filled in. Publish anyway?`)) return;
+    const acca = Number($("add-acca").value) > 1 ? { odds: Number($("add-acca").value), stake: count } : undefined;
+    const week = { n, date: $("add-date").value.trim(), treasurer: D.meta && D.meta.treasurer, picks, ...(acca ? { acca } : {}) };
+    $("publish").disabled = true; st("pub-status", "Publishing…");
     try {
-      const r = await fetch("/api/upload"); if (!r.ok) return;
-      const { recent } = await r.json(); const who = new Set(recent.map(x => x.who));
-      document.querySelectorAll("#rcv span").forEach(s => s.classList.toggle("y", who.has(s.dataset.p)));
-    } catch { }
+      const r = await fetch("/api/weeks", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ week, by, code: $("add-code").value, images: shots }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.status === 403) { $("code-row").hidden = false; throw new Error(j.error || "Enter the syndicate code"); }
+      if (!r.ok) throw new Error(j.error || "Couldn't publish");
+      mergeWeek(j.week);
+      st("pub-status", `Week ${n} is live on the site.`, "ok");
+      shots = []; $("up-thumbs").innerHTML = ""; st("read-status", "");
+      document.getElementById("live").scrollIntoView({ behavior: "smooth" });
+    } catch (e) { st("pub-status", e.message, "err"); }
+    $("publish").disabled = false;
+  });
+
+  function mergeWeek(w) {
+    const arr = D.weeks;
+    const i = arr.findIndex(x => x.n === w.n);
+    if (i >= 0) { if (!fromSite.has(w.n)) return; arr[i] = w; } else arr.push(w);
+    fromSite.add(w.n);
+    try { if (typeof window.render === "function") window.render(); } catch { }
+    reloadLive();
   }
-  loadReceived();
+
+  /* ---------- start ---------- */
+  (async () => {
+    try {
+      const r = await fetch("/api/weeks");
+      if (r.ok) {
+        const { weeks: siteWeeks } = await r.json();
+        for (const w of siteWeeks || []) {
+          if (D.weeks.some(x => x.n === w.n)) continue; // the tracker's copy wins once Jack has entered results
+          D.weeks.push(w); fromSite.add(w.n);
+        }
+        if (fromSite.size) try { window.render(); } catch { }
+      }
+    } catch { }
+    resetForm();
+    initLive();
+  })();
 })();
