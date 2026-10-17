@@ -52,29 +52,38 @@
   .seg2 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
   .seg2 button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
   .lv-foot{color:var(--muted);font-size:.76rem;margin:0}
-  .add-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr);gap:16px}
-  @media (max-width:820px){.add-grid{grid-template-columns:1fr}}
-  .add-col{display:flex;flex-direction:column;gap:10px;min-width:0}
-  .add-col label,.lab2{font-size:.78rem;color:var(--muted)}
-  .add-col select,.add-col input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:7px 8px;min-width:0;box-sizing:border-box}
-  .up-drop{border:1.5px dashed var(--rule);border-radius:8px;padding:18px;text-align:center;color:var(--muted);background:var(--soft);cursor:pointer}
-  .up-drop.over{border-color:var(--accent);color:var(--accent)}
-  .up-thumbs{display:flex;flex-wrap:wrap;gap:6px}
-  .up-thumbs img{max-height:260px;max-width:100%;border-radius:6px;border:1px solid var(--rule);cursor:zoom-in}
-  .up-thumbs.big img{max-height:none}
-  .up-btn{font:inherit;font-weight:600;cursor:pointer;border-radius:6px;padding:10px 16px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);align-self:flex-start}
-  .up-btn.ghost{background:transparent;color:var(--accent)}
+  .add-col{display:flex;flex-direction:column;gap:10px;min-width:0;max-width:640px}
+  .add-col label{font-size:.78rem;color:var(--muted)}
+  .add-col input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:7px 8px;min-width:0;box-sizing:border-box}
+  .up-btn{font:inherit;font-weight:600;cursor:pointer;border-radius:8px;padding:10px 18px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);align-self:flex-start}
+  .up-btn.big{font-family:var(--display);font-size:1.3rem;letter-spacing:.05em;text-transform:uppercase;padding:14px 22px;align-self:stretch}
   .up-btn[disabled]{opacity:.5;cursor:default}
-  .up-status{font-size:.85rem;min-height:1.2em;color:var(--muted)}
-  .up-status.ok{color:var(--up)}.up-status.err{color:var(--down)}
+  .lnk{all:unset;cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem;align-self:flex-start}
+  .lnk:focus-visible,.up-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .up-status{font-size:.88rem;min-height:1.2em;color:var(--muted)}
+  .up-status.ok{color:var(--up);font-weight:600}.up-status.err{color:var(--down)}
+  .wk-head{font-family:var(--display);font-size:1.25rem;letter-spacing:.03em}
   .wk-row{display:flex;gap:8px;flex-wrap:wrap}
   .wk-row>div{display:flex;flex-direction:column;gap:3px}
-  .sel{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 4.6rem 1.8rem;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--rule)}
-  .sel input,.sel select{width:100%}
-  .sel .mt2{grid-column:2/4}
-  .sel .x{all:unset;cursor:pointer;color:var(--muted);text-align:center;font-size:1.1rem}
-  .sel.dupe select{border-color:var(--down)}
-  .sel-head{display:grid;grid-template-columns:5.6rem minmax(0,1fr) 4.6rem 1.8rem;gap:6px;font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  .row2{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+  .games{display:flex;flex-direction:column;gap:8px}
+  .gm{border:1px solid var(--rule);border-radius:10px;padding:10px 10px;background:var(--paper);display:flex;flex-direction:column;gap:8px}
+  .gm.done{border-color:color-mix(in srgb,var(--up) 55%,var(--rule))}
+  .gm-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+  .gm-t b{font-family:var(--display);font-size:1.2rem;letter-spacing:.03em}
+  .gm-o{font-family:var(--mono);font-size:.9rem;font-weight:600}
+  .gm-m{font-size:.8rem;color:var(--muted)}
+  .gm-x{all:unset;cursor:pointer;color:var(--muted);font-size:1.3rem;line-height:1;padding:0 4px}
+  .chips9{display:flex;flex-wrap:wrap;gap:3px}
+  .chips9 button{all:unset;cursor:pointer;box-sizing:border-box;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:.9rem;border:1px solid var(--rule);color:var(--ink);background:var(--soft)}
+  .chips9 button.used{opacity:.35}
+  .chips9 button[aria-pressed="true"]{background:var(--best);color:var(--best-ink);border-color:transparent;opacity:1}
+  .chips9 button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+  .gm details summary{cursor:pointer;font-size:.78rem;color:var(--muted)}
+  .gm-fix{display:grid;grid-template-columns:minmax(0,1fr) 5.5rem;gap:6px;margin-top:6px}
+  .gm-fix input{font:inherit;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:6px 8px;min-width:0}
+  .gm-fix .wide{grid-column:1/-1}
+  #left b{font-family:var(--display);margin-right:2px}
   .tagsite{display:inline-block;font-size:.7rem;font-weight:600;padding:1px 7px;border-radius:999px;background:var(--pend);color:var(--pend-ink)}
   `;
   document.head.insertAdjacentHTML("beforeend", `<style>${css}</style>`);
@@ -102,28 +111,28 @@
   (lastPanel || wrap.lastElementChild).insertAdjacentHTML("afterend", `
   <section class="panel" id="add" aria-labelledby="add-title">
     <h2 id="add-title">Add this week's games</h2>
-    <p class="how">Upload the Sky Bet slip, fill in who picked each game and the odds, then hit Publish. The week goes on the site straight away.</p>
-    <div class="add-grid">
-      <div class="add-col">
-        <div><label for="add-by">Who's adding?</label><br><select id="add-by"><option value="">Choose your name</option>${players.map(p => `<option value="${esc(p)}">${esc(full(p))}</option>`).join("")}</select></div>
-        <div class="up-drop" id="up-drop" tabindex="0" role="button">Tap to choose screenshots, or drop them here</div>
-        <input type="file" id="up-file" accept="image/*" multiple hidden>
-        <div class="up-status" id="read-status" role="status"></div>
-        <div class="up-thumbs" id="up-thumbs"></div>
+    <div id="step1" class="add-col">
+      <p class="how">Upload the Sky Bet slip. The games and odds are read off it automatically, then you just tap who picked each one.</p>
+      <button class="up-btn big" id="up-btn" type="button">Upload bet slip</button>
+      <input type="file" id="up-file" accept="image/*" multiple hidden>
+      <div class="up-status" id="read-status" role="status"></div>
+      <p class="how" id="cur-note" hidden><span id="cur-text"></span><button class="lnk" id="edit-cur" type="button">edit it</button>.</p>
+      <button class="lnk" id="manual" type="button" hidden>Type the games in instead</button>
+    </div>
+    <div id="step2" class="add-col" hidden>
+      <div class="wk-head"><b id="wk-line"></b> <button class="lnk" id="wk-edit" type="button">change</button></div>
+      <div class="wk-row" id="wk-fields" hidden>
+        <div><label for="add-n">Week</label><input type="number" id="add-n" min="1" max="60" style="width:5rem"></div>
+        <div><label for="add-date">Date</label><input type="text" id="add-date" style="width:8.5rem"></div>
+        <div><label for="add-acca">Acca odds</label><input type="number" id="add-acca" step="0.01" min="1" style="width:7rem" placeholder="optional"></div>
       </div>
-      <div class="add-col">
-        <div class="wk-row">
-          <div><label for="add-n">Week</label><input type="number" id="add-n" min="1" max="60" style="width:5rem"></div>
-          <div><label for="add-date">Date</label><input type="text" id="add-date" style="width:8.5rem" placeholder="17 Oct 2026"></div>
-          <div><label for="add-acca">Acca odds</label><input type="number" id="add-acca" step="0.01" min="1" style="width:7rem" placeholder="optional"></div>
-        </div>
-        <div class="sel-head"><span>Player</span><span>Team backed / match</span><span>Odds</span><span></span></div>
-        <div id="sels"></div>
-        <button class="up-btn ghost" id="add-row" type="button">Add a game</button>
-        <div id="code-row" hidden><label for="add-code">Syndicate code</label><br><input type="text" id="add-code" autocomplete="off"></div>
-        <button class="up-btn" id="publish" type="button">Publish to the site</button>
-        <div class="up-status" id="pub-status" role="status"></div>
-      </div>
+      <p class="how">Tap who picked each game.</p>
+      <div id="games" class="games"></div>
+      <div class="how" id="left"></div>
+      <button class="lnk" id="add-game" type="button">+ Add a game that's missing</button>
+      <div id="code-row" hidden><label for="add-code">Syndicate code</label><br><input type="text" id="add-code" autocomplete="off"></div>
+      <div class="row2"><button class="up-btn" id="publish" type="button">Publish to the site</button><button class="lnk" id="restart" type="button">Start again</button></div>
+      <div class="up-status" id="pub-status" role="status"></div>
     </div>
   </section>`);
 
@@ -314,37 +323,69 @@
   }
 
   /* ---------- add this week's games ---------- */
-  let shots = [], fromSite = new Set();
+  let shots = [], games = [], fromSite = new Set();
   const st = (id, t, c) => { const s = $(id); s.textContent = t; s.className = "up-status" + (c ? " " + c : ""); };
   const allWeeks = () => [...(D.weeks || [])].sort((a, b) => a.n - b.n);
   const fmtDate = d => d.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
-  const playerOpts = sel => `<option value="">Who?</option>${players.map(p => `<option value="${esc(p)}"${p === sel ? " selected" : ""}>${esc(p)}</option>`).join("")}`;
-  function addRow(x = {}) {
-    const d = document.createElement("div"); d.className = "sel";
-    d.innerHTML = `<select aria-label="Player">${playerOpts(x.player)}</select><input aria-label="Team backed" placeholder="Team" value="${esc(x.team || "")}"><input aria-label="Odds" type="number" step="0.01" min="1.01" placeholder="2.10" value="${x.odds != null ? esc(x.odds) : ""}"><button class="x" type="button" aria-label="Remove game">×</button><span></span><input class="mt2" aria-label="Match" placeholder="Home v Away" value="${esc(x.match || "")}">`;
-    d.querySelector(".x").addEventListener("click", () => { d.remove(); checkDupes(); });
-    d.querySelector("select").addEventListener("change", checkDupes);
-    $("sels").appendChild(d);
-  }
-  function checkDupes() {
-    const rows = [...document.querySelectorAll("#sels .sel")], seen = {};
-    rows.forEach(r => { const v = r.querySelector("select").value; if (v) seen[v] = (seen[v] || 0) + 1; });
-    rows.forEach(r => r.classList.toggle("dupe", (seen[r.querySelector("select").value] || 0) > 1));
-  }
-  function resetForm() {
-    const ws = allWeeks(), last = ws[ws.length - 1];
-    const nextN = last ? (last.picks && Object.values(last.picks).some(pk => pk.result == null) && fromSite.has(last.n) ? last.n : last.n + 1) : 1;
-    $("add-n").value = nextN; $("add-date").value = fmtDate(new Date()); $("add-acca").value = "";
-    $("sels").innerHTML = "";
-    const cur = fromSite.has(nextN) && ws.find(w => w.n === nextN);
-    if (cur) {
-      // This week was added from the site and isn't settled: show it so anyone can correct it.
-      if (cur.date) $("add-date").value = cur.date;
-      if (cur.acca && cur.acca.odds) $("add-acca").value = cur.acca.odds;
-      players.forEach(p => cur.picks[p] && addRow({ ...cur.picks[p], player: p }));
-      st("read-status", `Week ${nextN} is already up. Change anything below and publish again to correct it.`);
+  const odds2 = o => o != null && o !== "" && !isNaN(o) ? Number(o).toFixed(2) : "?";
+
+  function guessPlayer(team, taken) {
+    // Backed the same team in the last few weeks? Probably theirs again.
+    for (const w of allWeeks().slice(-4).reverse()) for (const p of players) {
+      const pk = w.picks && w.picks[p];
+      if (pk && pk.team && !taken.has(p) && sim(pk.team, team) >= .99) return p;
     }
-    for (let i = $("sels").children.length; i < players.length; i++) addRow();
+    return "";
+  }
+  function nextWeekN() {
+    const ws = allWeeks(), last = ws[ws.length - 1];
+    if (!last) return 1;
+    const open = fromSite.has(last.n) && Object.values(last.picks || {}).every(pk => pk.result == null);
+    return open ? last.n : last.n + 1;
+  }
+  function setWeekLine(n, date) {
+    $("add-n").value = n; $("add-date").value = date;
+    $("wk-line").textContent = `Week ${n} · ${date}`;
+  }
+  function renderGames() {
+    const taken = {}; games.forEach(g => { if (g.player) taken[g.player] = (taken[g.player] || 0) + 1; });
+    $("games").innerHTML = games.map((g, i) => `<div class="gm${g.player ? " done" : ""}" data-i="${i}">
+      <div class="gm-top"><div class="gm-t"><b>${esc(g.team || "Unknown team")}</b> <span class="gm-o">@ ${odds2(g.odds)}</span><div class="gm-m">${esc(g.match || "")}${g.kickoff ? " · " + esc(g.kickoff) : ""}</div></div><button class="gm-x" type="button" data-act="del" aria-label="Remove this game">×</button></div>
+      <div class="chips9" role="group" aria-label="Who picked ${esc(g.team || "this game")}?">${players.map(p => `<button type="button" data-act="pick" data-p="${esc(p)}" title="${esc(full(p))}" aria-pressed="${g.player === p}" class="${g.player !== p && taken[p] ? "used" : ""}">${esc(p)}</button>`).join("")}</div>
+      <details${g.open ? " open" : ""}><summary>Fix this game</summary><div class="gm-fix">
+        <input data-f="team" aria-label="Team" placeholder="Team" value="${esc(g.team || "")}">
+        <input data-f="odds" aria-label="Odds" type="number" step="0.01" min="1.01" placeholder="Odds" value="${g.odds != null ? esc(g.odds) : ""}">
+        <input data-f="match" aria-label="Match" placeholder="Home v Away" value="${esc(g.match || "")}" class="wide">
+      </div></details></div>`).join("");
+    const left = players.filter(p => !taken[p]);
+    $("left").innerHTML = left.length ? `Still to pick: ${left.map(p => `<b title="${esc(full(p))}">${esc(p)}</b>`).join(" ")}` : `Everyone's matched up.`;
+  }
+  $("games").addEventListener("click", e => {
+    const b = e.target.closest("button[data-act]"); if (!b) return;
+    const i = +b.closest(".gm").dataset.i;
+    if (b.dataset.act === "del") { if (confirm("Remove this game?")) { games.splice(i, 1); renderGames(); } return; }
+    const p = b.dataset.p;
+    games.forEach((g, j) => { if (j !== i && g.player === p) g.player = ""; }); // one game each
+    games[i].player = games[i].player === p ? "" : p;
+    renderGames();
+  });
+  $("games").addEventListener("change", e => {
+    const f = e.target.dataset.f; if (!f) return;
+    const g = games[+e.target.closest(".gm").dataset.i];
+    g[f] = f === "odds" ? (e.target.value === "" ? null : Number(e.target.value)) : f === "team" ? e.target.value.toUpperCase() : e.target.value;
+    g.open = true; renderGames();
+  });
+  $("games").addEventListener("toggle", e => { const gm = e.target.closest && e.target.closest(".gm"); if (gm) games[+gm.dataset.i].open = e.target.open; }, true);
+  $("add-game").addEventListener("click", () => { games.push({ team: "", match: "", odds: null, player: "", open: true }); renderGames(); });
+  $("wk-edit").addEventListener("click", () => { $("wk-fields").hidden = !$("wk-fields").hidden; });
+  ["add-n", "add-date"].forEach(id => $(id).addEventListener("change", () => setWeekLine($("add-n").value, $("add-date").value)));
+
+  function showGames(list, acca, date) {
+    games = list;
+    $("add-acca").value = acca || "";
+    setWeekLine(nextWeekN(), date || fmtDate(new Date()));
+    $("step1").hidden = true; $("step2").hidden = false;
+    renderGames();
   }
   async function shrink(file) {
     const bmp = await createImageBitmap(file).catch(() => null);
@@ -354,63 +395,81 @@
     c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
     return c.toDataURL("image/jpeg", 0.85);
   }
-  async function addFiles(list) {
-    const fresh = [...list].filter(f => /^image\//.test(f.type)).slice(0, 4);
-    if (!fresh.length) return;
-    shots = await Promise.all(fresh.map(shrink));
-    $("up-thumbs").innerHTML = shots.map(u => `<img alt="Uploaded screenshot" src="${u}">`).join("");
-    st("read-status", "Fill in the games from the screenshot below, then publish. Tap it to make it bigger.");
+  async function readSlip(list) {
+    const files = [...list].filter(f => /^image\//.test(f.type)).slice(0, 4);
+    if (!files.length) return;
+    $("up-btn").disabled = true;
+    st("read-status", "Reading the slip… this takes about 10 seconds");
+    shots = await Promise.all(files.map(shrink));
+    try {
+      const lastWeek = {}; const lw = allWeeks().slice(-1)[0];
+      if (lw && lw.picks) players.forEach(p => { if (lw.picks[p]) lastWeek[p] = lw.picks[p].team; });
+      const r = await fetch("/api/read-slip", { method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ images: shots, players: Object.fromEntries(players.map(p => [p, full(p)])), lastWeek }) });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(j.message || "Couldn't read the slip.");
+      const sels = j.selections || [];
+      if (!sels.length) throw new Error("No games found on that screenshot.");
+      const taken = new Set(sels.map(x => x.player).filter(p => players.includes(p)));
+      const list2 = sels.map(x => {
+        let p = players.includes(x.player) ? x.player : guessPlayer(x.team || "", taken);
+        if (p) taken.add(p);
+        return { team: (x.team || "").toUpperCase(), match: x.match || "", odds: x.odds != null ? Number(x.odds) : null, kickoff: x.kickoff || "", player: p, open: x.odds == null || !x.team };
+      });
+      st("read-status", "");
+      showGames(list2, j.acca && j.acca.odds, j.date);
+    } catch (e) {
+      st("read-status", `${e.message} You can type the games in instead.`, "err");
+      $("manual").hidden = false;
+    }
+    $("up-btn").disabled = false;
   }
-  const drop = $("up-drop");
-  drop.addEventListener("click", () => $("up-file").click());
-  drop.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("up-file").click(); } });
-  $("up-file").addEventListener("change", e => addFiles(e.target.files));
-  drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
-  drop.addEventListener("dragleave", () => drop.classList.remove("over"));
-  drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); });
-  document.addEventListener("paste", e => { if (e.clipboardData && e.clipboardData.files.length && !e.target.closest("input")) addFiles(e.clipboardData.files); });
-  $("up-thumbs").addEventListener("click", () => $("up-thumbs").classList.toggle("big"));
-  $("add-row").addEventListener("click", () => addRow());
-  try { const w = localStorage.getItem("oak-who"); if (w) $("add-by").value = w; } catch { }
-  $("add-by").addEventListener("change", () => { try { localStorage.setItem("oak-who", $("add-by").value); } catch { } });
+  $("up-btn").addEventListener("click", () => $("up-file").click());
+  $("up-file").addEventListener("change", e => { readSlip(e.target.files); e.target.value = ""; });
+  const sec = $("add");
+  sec.addEventListener("dragover", e => { e.preventDefault(); });
+  sec.addEventListener("drop", e => { e.preventDefault(); if ($("step2").hidden) readSlip(e.dataTransfer.files); });
+  document.addEventListener("paste", e => { if (e.clipboardData && e.clipboardData.files.length && !e.target.closest("input") && $("step2").hidden) readSlip(e.clipboardData.files); });
+  $("manual").addEventListener("click", () => showGames(players.map(() => ({ team: "", match: "", odds: null, player: "", open: true }))));
+  $("restart").addEventListener("click", () => { games = []; shots = []; $("step2").hidden = true; $("step1").hidden = false; st("pub-status", ""); st("read-status", ""); });
+  $("edit-cur").addEventListener("click", () => {
+    const w = allWeeks().find(x => x.n === nextWeekN()); if (!w) return;
+    showGames(players.filter(p => w.picks[p]).map(p => ({ ...w.picks[p], player: p })), w.acca && w.acca.odds, w.date);
+  });
 
   $("publish").addEventListener("click", async () => {
-    const n = Number($("add-n").value), by = $("add-by").value;
-    if (!by) return st("pub-status", "Choose your name first", "err");
+    const n = Number($("add-n").value);
     if (!Number.isInteger(n) || n < 1) return st("pub-status", "Week number looks wrong", "err");
     const existing = allWeeks().find(w => w.n === n);
-    if (existing && !fromSite.has(n)) return st("pub-status", `Week ${n} is already on the table. Use week ${allWeeks().slice(-1)[0].n + 1}.`, "err");
-    const picks = {}; let problem = "";
-    document.querySelectorAll("#sels .sel").forEach(r => {
-      const [sel, team, odds, , , match] = r.children;
-      const t = team.value.trim(), o = Number(odds.value), p = sel.value;
-      if (!t && !p && !odds.value) return;
-      if (!p) problem = problem || `Who picked ${t || "that game"}?`;
-      else if (picks[p]) problem = problem || `${full(p)} is down twice`;
-      else if (!t) problem = problem || `What team did ${full(p)} pick?`;
-      else if (!(o >= 1.01)) problem = problem || `Odds for ${t} look wrong`;
-      else picks[p] = { team: t.toUpperCase(), match: match.value.trim(), odds: o };
-    });
-    if (problem) return st("pub-status", problem, "err");
-    const count = Object.keys(picks).length;
-    if (!count) return st("pub-status", "No games to publish yet", "err");
-    if (count < players.length && !confirm(`Only ${count} of ${players.length} picks filled in. Publish anyway?`)) return;
-    const acca = Number($("add-acca").value) > 1 ? { odds: Number($("add-acca").value), stake: count } : undefined;
+    if (existing && !fromSite.has(n)) return st("pub-status", `Week ${n} is already on the table. Change it to week ${allWeeks().slice(-1)[0].n + 1}.`, "err");
+    const unpicked = games.filter(g => !g.player);
+    if (unpicked.length) return st("pub-status", `Pick who chose ${unpicked.map(g => g.team || "each game").join(", ")}`, "err");
+    const bad = games.find(g => !g.team || !(Number(g.odds) >= 1.01));
+    if (bad) { bad.open = true; renderGames(); return st("pub-status", `Check the team and odds for ${bad.team || "the game marked open"}`, "err"); }
+    const picks = {}; games.forEach(g => { picks[g.player] = { team: g.team.toUpperCase(), match: g.match, odds: Number(g.odds) }; });
+    if (games.length < players.length && !confirm(`Only ${games.length} of ${players.length} picks. Publish anyway?`)) return;
+    const acca = Number($("add-acca").value) > 1 ? { odds: Number($("add-acca").value), stake: games.length } : undefined;
     const week = { n, date: $("add-date").value.trim(), treasurer: D.meta && D.meta.treasurer, picks, ...(acca ? { acca } : {}) };
     $("publish").disabled = true; st("pub-status", "Publishing…");
     try {
       const r = await fetch("/api/weeks", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ week, by, code: $("add-code").value, images: shots }) });
+        body: JSON.stringify({ week, by: "Website", code: $("add-code").value, images: shots }) });
       const j = await r.json().catch(() => ({}));
       if (r.status === 403) { $("code-row").hidden = false; throw new Error(j.error || "Enter the syndicate code"); }
       if (!r.ok) throw new Error(j.error || "Couldn't publish");
       mergeWeek(j.week);
-      st("pub-status", `Week ${n} is live on the site.`, "ok");
-      shots = []; $("up-thumbs").innerHTML = ""; st("read-status", "");
-      document.getElementById("live").scrollIntoView({ behavior: "smooth" });
+      games = []; shots = [];
+      $("step2").hidden = true; $("step1").hidden = false; updateStep1();
+      st("read-status", `Week ${n} is live on the site.`, "ok");
+      ($("live").hidden ? $("grid") : $("live")).scrollIntoView({ behavior: "smooth" });
     } catch (e) { st("pub-status", e.message, "err"); }
     $("publish").disabled = false;
   });
+  function updateStep1() {
+    const n = nextWeekN(), cur = fromSite.has(n) && allWeeks().find(x => x.n === n);
+    $("cur-note").hidden = !cur;
+    if (cur) $("cur-text").textContent = `Week ${n} is already up. Upload a new slip to replace it, or `;
+  }
 
   function mergeWeek(w) {
     const arr = D.weeks;
@@ -434,7 +493,7 @@
         if (fromSite.size) try { window.render(); } catch { }
       }
     } catch { }
-    resetForm();
+    updateStep1();
     initLive();
   })();
 })();
