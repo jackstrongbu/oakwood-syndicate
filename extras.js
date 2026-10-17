@@ -102,7 +102,7 @@
   (lastPanel || wrap.lastElementChild).insertAdjacentHTML("afterend", `
   <section class="panel" id="add" aria-labelledby="add-title">
     <h2 id="add-title">Add this week's games</h2>
-    <p class="how">Upload the Sky Bet slip (add the WhatsApp picks screenshot too if you want names filled in). The games are read off it, you check them, hit Publish and they're on the site straight away with live scores.</p>
+    <p class="how">Upload the Sky Bet slip, fill in who picked each game and the odds, then hit Publish. The week goes on the site straight away.</p>
     <div class="add-grid">
       <div class="add-col">
         <div><label for="add-by">Who's adding?</label><br><select id="add-by"><option value="">Choose your name</option>${players.map(p => `<option value="${esc(p)}">${esc(full(p))}</option>`).join("")}</select></div>
@@ -266,13 +266,17 @@
     try {
       const r = await fetch(`/api/scores?from=${from}&to=${to}`);
       if (!r.ok) throw new Error(r.status);
-      feed = await r.json(); failCount = 0;
+      const j = await r.json();
+      if (!Array.isArray(j.fixtures)) throw new Error("bad feed");
+      feed = j; failCount = 0;
+      $("live").hidden = false; $("nav-live").hidden = false;
       next = Math.max(30, Math.min(feed.refresh || 60, 600));
       render();
     } catch (e) {
       failCount++;
       next = Math.min(60 * 2 ** failCount, 900);
-      if (!feed) { $("lv-meta").textContent = "Live scores aren't available right now"; $("lv-foot").textContent = ""; render(); }
+      // No feed at all: hide the live panel rather than show a broken one.
+      if (!feed) { $("live").hidden = true; $("nav-live").hidden = true; }
     }
     if (!document.hidden) timer = setTimeout(load, next * 1000);
   }
@@ -302,15 +306,6 @@
     rows.forEach(r => { const v = r.querySelector("select").value; if (v) seen[v] = (seen[v] || 0) + 1; });
     rows.forEach(r => r.classList.toggle("dupe", (seen[r.querySelector("select").value] || 0) > 1));
   }
-  function guessPlayer(team, taken) {
-    // Same team as someone's pick last week? Probably theirs again.
-    const last = allWeeks().slice(-3).reverse();
-    for (const w of last) for (const p of players) {
-      const pk = w.picks && w.picks[p];
-      if (pk && pk.team && !taken.has(p) && sim(pk.team, team) >= .99) return p;
-    }
-    return "";
-  }
   function resetForm() {
     const ws = allWeeks(), last = ws[ws.length - 1];
     const nextN = last ? (last.picks && Object.values(last.picks).some(pk => pk.result == null) && fromSite.has(last.n) ? last.n : last.n + 1) : 1;
@@ -326,16 +321,6 @@
     }
     for (let i = $("sels").children.length; i < players.length; i++) addRow();
   }
-  function fillFrom(data) {
-    const sels = data.selections || [];
-    if (data.date) $("add-date").value = data.date;
-    if (data.acca && data.acca.odds) $("add-acca").value = data.acca.odds;
-    $("sels").innerHTML = "";
-    const taken = new Set(sels.map(x => x.player).filter(p => players.includes(p)));
-    sels.forEach(x => { let p = players.includes(x.player) ? x.player : guessPlayer(x.team, taken); if (p) taken.add(p); addRow({ ...x, player: p }); });
-    for (let i = sels.length; i < players.length; i++) addRow();
-    checkDupes();
-  }
   async function shrink(file) {
     const bmp = await createImageBitmap(file).catch(() => null);
     if (!bmp) return new Promise(res => { const r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(file); });
@@ -349,18 +334,7 @@
     if (!fresh.length) return;
     shots = await Promise.all(fresh.map(shrink));
     $("up-thumbs").innerHTML = shots.map(u => `<img alt="Uploaded screenshot" src="${u}">`).join("");
-    st("read-status", "Reading the games off the screenshot…");
-    try {
-      const lastWeek = {}; const lw = allWeeks().slice(-1)[0];
-      if (lw && lw.picks) players.forEach(p => { if (lw.picks[p]) lastWeek[p] = lw.picks[p].team; });
-      const r = await fetch("/api/read-slip", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ images: shots, players: Object.fromEntries(players.map(p => [p, full(p)])), lastWeek }) });
-      const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.message || "Couldn't read it automatically, fill the table in from the screenshot.");
-      fillFrom(j);
-      const n = (j.selections || []).length, named = (j.selections || []).filter(x => x.player).length;
-      st("read-status", `Found ${n} game${n === 1 ? "" : "s"}. Check the odds and who picked what, then publish.`, "ok");
-    } catch (e) { st("read-status", e.message, "err"); }
+    st("read-status", "Fill in the games from the screenshot below, then publish. Tap it to make it bigger.");
   }
   const drop = $("up-drop");
   drop.addEventListener("click", () => $("up-file").click());
