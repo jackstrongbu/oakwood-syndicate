@@ -14,11 +14,17 @@ const ESPN_LEAGUES = [
 const ymd = s => /^\d{8}$/.test(s || "") ? s : null;
 const iso = s => `${s.slice(0, 4)}-${s.slice(4, 6)}-${s.slice(6, 8)}`;
 
+const HEADERS = {
+  "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
+  "Accept": "application/json,text/plain,*/*", "Accept-Language": "en-GB,en;q=0.9",
+  "Referer": "https://www.espn.co.uk/", "Origin": "https://www.espn.co.uk",
+};
+const diag = [];
 async function espnLeague(league, from, to) {
   const url = `https://site.api.espn.com/apis/site/v2/sports/soccer/${league}/scoreboard?dates=${from}-${to}&limit=400`;
   try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
-    if (!r.ok) return [];
+    const r = await fetch(url, { headers: HEADERS, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) { diag.push(`${league}:${r.status}`); return []; }
     const j = await r.json();
     const lname = j.leagues?.[0]?.name || league;
     return (j.events || []).map(e => {
@@ -37,7 +43,7 @@ async function espnLeague(league, from, to) {
         detail: st.shortDetail || st.description || "",
       };
     });
-  } catch { return []; }
+  } catch (e) { diag.push(`${league}:${e.name}`); return []; }
 }
 const num = v => v == null || v === "" ? null : Number(v);
 
@@ -78,6 +84,7 @@ export default async (req) => {
   const from = ymd(u.searchParams.get("from")), to = ymd(u.searchParams.get("to")) || from;
   if (!from) return Response.json({ error: "from=YYYYMMDD required" }, { status: 400 });
 
+  diag.length = 0;
   const lists = await Promise.all(ESPN_LEAGUES.map(l => espnLeague(l, from, to)));
   let fixtures = lists.flat();
   const key = process.env.API_FOOTBALL_KEY;
@@ -86,10 +93,10 @@ export default async (req) => {
   const live = fixtures.some(f => f.state === "in");
   const soon = fixtures.some(f => f.state === "pre" && Math.abs(new Date(f.kickoff) - Date.now()) < 20 * 60e3);
   const base = Number(process.env.REFRESH_SECONDS) || (key ? 300 : 60);
-  const ttl = live || soon ? base : (key ? 1800 : 600);
+  const ttl = !fixtures.length && diag.length ? 30 : live || soon ? base : (key ? 1800 : 600);
 
   return Response.json(
-    { fetched: new Date().toISOString(), refresh: ttl, sources: key ? ["espn", "api-football"] : ["espn"], fixtures },
+    { fetched: new Date().toISOString(), refresh: ttl, sources: key ? ["espn", "api-football"] : ["espn"], errors: diag.slice(0, 30), fixtures },
     { headers: {
       "Cache-Control": "public, max-age=30",
       "Netlify-CDN-Cache-Control": `public, durable, s-maxage=${ttl}, stale-while-revalidate=30`,

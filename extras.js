@@ -260,14 +260,39 @@
     });
   }
 
+  const LEAGUES = ["eng.1", "eng.2", "eng.3", "eng.4", "eng.5", "eng.fa", "eng.league_cup", "eng.trophy", "sco.1", "sco.2", "sco.3", "sco.4", "sco.tennents", "sco.cis", "uefa.champions", "uefa.europa", "uefa.europa.conf", "esp.1", "ita.1", "ger.1", "fra.1"];
+  async function direct() {
+    const lists = await Promise.all(LEAGUES.map(async lg => {
+      try {
+        const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${lg}/scoreboard?dates=${from}-${to}&limit=400`);
+        if (!r.ok) return [];
+        const j = await r.json(), ln = j.leagues?.[0]?.name || lg;
+        return (j.events || []).map(e => {
+          const c = e.competitions?.[0] || {}, side = h => c.competitors?.find(x => x.homeAway === h) || {};
+          const H = side("home"), A = side("away"), t = e.status?.type || {};
+          const state = /postpon|cancel|abandon|suspend|delay/i.test(t.name || "") ? "off" : t.state === "in" ? "in" : t.state === "post" ? "post" : "pre";
+          const n = v => v == null || v === "" ? null : Number(v);
+          return { src: "espn", id: "e" + e.id, league: ln, kickoff: e.date, home: H.team?.displayName || "", away: A.team?.displayName || "",
+            homeShort: H.team?.shortDisplayName || "", awayShort: A.team?.shortDisplayName || "",
+            hs: state === "pre" ? null : n(H.score), as: state === "pre" ? null : n(A.score), state,
+            clock: state === "in" ? (e.status?.displayClock || "") : "", detail: t.shortDetail || "" };
+        });
+      } catch { return []; }
+    }));
+    const fixtures = lists.flat();
+    if (!fixtures.length) throw new Error("no fixtures");
+    return { fetched: new Date().toISOString(), refresh: 60, fixtures };
+  }
   async function load() {
     clearTimeout(timer);
     let next = 60;
     try {
       const r = await fetch(`/api/scores?from=${from}&to=${to}`);
       if (!r.ok) throw new Error(r.status);
-      const j = await r.json();
+      let j = await r.json();
       if (!Array.isArray(j.fixtures)) throw new Error("bad feed");
+      // If the server couldn't reach the feed, fetch it straight from this browser instead.
+      if (!j.fixtures.length && (j.errors || []).length) j = await direct().catch(() => j);
       feed = j; failCount = 0;
       $("live").hidden = false; $("nav-live").hidden = false;
       next = Math.max(30, Math.min(feed.refresh || 60, 600));
