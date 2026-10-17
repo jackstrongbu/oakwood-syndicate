@@ -99,6 +99,7 @@ export default async (req) => {
     { fetched: new Date().toISOString(), refresh: ttl, sources: key ? ["espn", "api-football"] : ["espn"], errors: diag.slice(0, 30), fixtures },
     { headers: {
       "Cache-Control": "public, max-age=30",
+      "Netlify-Vary": "query=from|to",
       "Netlify-CDN-Cache-Control": `public, durable, s-maxage=${ttl}, stale-while-revalidate=30`,
     } },
   );
